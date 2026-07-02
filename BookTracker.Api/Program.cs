@@ -46,6 +46,11 @@ app.MapDelete("/books/{id:int}", async (int id, BookService service) =>
 app.MapPut("/books/{id:int}", async (int id, UpdateBookRequest request, BookService service) =>
 await service.UpdateBook(id, request) ? Results.NoContent() : Results.NotFound());
 
+app.MapGet("/books/{id:int}", async (int id, BookService service) =>
+{
+    var book = await service.GetBookById(id);
+    return book is null ? Results.NotFound() : Results.Ok(book);
+});
 
 app.Run(); // NA ENDPOINT API
 

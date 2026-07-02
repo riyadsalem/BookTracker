@@ -1,5 +1,6 @@
 using BookTracker.Api.Application.BookList;
 using BookTracker.Api.Application.CreateBook;
+using BookTracker.Api.Application.GetBookById;
 using BookTracker.Api.Application.UpdateBook;
 using BookTracker.Api.Domain;
 using BookTracker.Api.Storage;
@@ -50,5 +51,18 @@ public class BookService(IBookRepository bookRepository)
              Year = request.Year
          });
 
+    public async Task<BookDetails?> GetBookById(int id)
+    {
+        Book? book = await bookRepository.GetByIdAsync(id);
 
+        if (book is null) return null;
+
+        return new BookDetails
+        {
+            Id = book.Id,
+            Title = book.Title,
+            Author = book.Author,
+            Year = book.Year
+        };
+    }
 }

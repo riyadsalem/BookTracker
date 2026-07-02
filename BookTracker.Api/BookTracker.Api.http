@@ -9,3 +9,27 @@ Content-Type: application/json
   "author": "Frank Herbert",
   "year": 1965
 }
+
+### Delete Book
+DELETE http://localhost:5172/books/4
+DELETE http://localhost:5172/books/9999
+
+
+### Update Book
+PUT http://localhost:5172/books/5
+Content-Type: application/json
+
+{
+  "title": "Changes",
+  "author": "David Bowie",
+  "year": 1971
+}
+
+PUT http://localhost:5172/books/9999
+Content-Type: application/json
+
+{
+  "title": "Unknown Book",
+  "author": "Unknown Author",
+  "year": 2000
+}

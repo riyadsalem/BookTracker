@@ -1,5 +1,6 @@
 using BookTracker.Api.Application;
 using BookTracker.Api.Application.CreateBook;
+using BookTracker.Api.Application.UpdateBook;
 using BookTracker.Api.Storage;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,6 +38,14 @@ app.MapPost("/books", async (CreateBookRequest request, BookService service) =>
     var response = await service.CreateBook(request);
     return Results.Created($"/books/{response.Id}", response);
 });
+
+// DELETE
+app.MapDelete("/books/{id:int}", async (int id, BookService service) =>
+     await service.DeleteBook(id) ? Results.NoContent() : Results.NotFound());
+
+app.MapPut("/books/{id:int}", async (int id, UpdateBookRequest request, BookService service) =>
+await service.UpdateBook(id, request) ? Results.NoContent() : Results.NotFound());
+
 
 app.Run(); // NA ENDPOINT API
 

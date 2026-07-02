@@ -6,7 +6,8 @@ namespace BookTracker.Api.Tests.IntegrationTests.BookList;
 
 public class BookListTests
 {
-    private readonly WebApplicationFactory<Program> factory = new();
+    // private readonly WebApplicationFactory<Program> factory = new(); ... STORAGE IN MEMORY
+    private readonly CustomWebApplicationFactory factory = new(); // EF CORE (SQL)
 
     [Fact]
     public async Task GetBooksReturnsBooks()

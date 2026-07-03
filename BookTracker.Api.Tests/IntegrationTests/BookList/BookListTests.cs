@@ -1,16 +1,14 @@
 using System.Net;
 using System.Net.Http.Json;
-using BookTracker.Api.Application;
-using BookTracker.Api.Application.BookList;
+using BookTracker.Api.Application.GetBookSummaries;
 using BookTracker.Api.Domain;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BookTracker.Api.Tests.IntegrationTests.BookList;
 
 public class BookListTests : IntegrationTest
 {
     [Fact]
-    public async Task GetBooksReturnsBooks()
+    public async Task GetBookSummariesReturnsBookSummaries()
     {
         Writer.Seed(db => db.Books.Add(
             new Book
@@ -23,17 +21,17 @@ public class BookListTests : IntegrationTest
 
 
         var response = await Client.GetAsync("/books");
-        // var result = await Client.GetFromJsonAsync<PagedResult<BookInfo>>("/books");
+        // var result = await Client.GetFromJsonAsync<PagedResult<BookSummary>>("/books");
 
-        PagedResult<BookInfo> result = await response.ReadJsonAs<PagedResult<BookInfo>>(HttpStatusCode.OK); // Als de status Correct is 
+        PagedResult<BookSummary> result = await response.ReadJsonAs<PagedResult<BookSummary>>(HttpStatusCode.OK); // Als de status Correct is 
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(result);
 
-        BookInfo bookInfo = Assert.Single(result.Items);
+        BookSummary BookSummary = Assert.Single(result.Items);
 
-        Assert.Equal("Cannery Row", bookInfo.Title);
-        Assert.Equal("John Steinbeck", bookInfo.Author);
+        Assert.Equal("Cannery Row", BookSummary.Title);
+        Assert.Equal("John Steinbeck", BookSummary.Author);
         Assert.Equal(1, result.Page);
         Assert.Equal(10, result.PageSize);
         Assert.Equal(1, result.TotalItems);
@@ -66,11 +64,11 @@ public class BookListTests : IntegrationTest
                 });
         });
 
-        PagedResult<BookInfo>? result = await Client.GetFromJsonAsync<PagedResult<BookInfo>>("/books?page=2&pageSize=1");
+        PagedResult<BookSummary>? result = await Client.GetFromJsonAsync<PagedResult<BookSummary>>("/books?page=2&pageSize=1");
 
         Assert.NotNull(result);
 
-        BookInfo book = Assert.Single(result.Items);
+        BookSummary book = Assert.Single(result.Items);
 
         Assert.Equal("Book 2", book.Title);
         Assert.Equal(2, result.Page);
@@ -93,7 +91,7 @@ public class BookListTests : IntegrationTest
                 });
         });
 
-        PagedResult<BookInfo>? result = await Client.GetFromJsonAsync<PagedResult<BookInfo>>("/books?page=99&pageSize=10");
+        PagedResult<BookSummary>? result = await Client.GetFromJsonAsync<PagedResult<BookSummary>>("/books?page=99&pageSize=10");
 
         Assert.NotNull(result);
         Assert.Empty(result.Items);
@@ -124,8 +122,8 @@ public class BookListTests : IntegrationTest
         });
 
         var response = await Client.GetAsync("/books?search=dune");
-        PagedResult<BookInfo> result = await response.ReadJsonAs<PagedResult<BookInfo>>(HttpStatusCode.OK);
-        BookInfo book = Assert.Single(result.Items);
+        PagedResult<BookSummary> result = await response.ReadJsonAs<PagedResult<BookSummary>>(HttpStatusCode.OK);
+        BookSummary book = Assert.Single(result.Items);
 
         Assert.Equal("Dune", book.Title);
         Assert.Equal("Frank Herbert", book.Author);
@@ -154,8 +152,8 @@ public class BookListTests : IntegrationTest
         });
 
         var response = await Client.GetAsync("/books?search=frank");
-        PagedResult<BookInfo> result = await response.ReadJsonAs<PagedResult<BookInfo>>(HttpStatusCode.OK);
-        BookInfo book = Assert.Single(result.Items);
+        PagedResult<BookSummary> result = await response.ReadJsonAs<PagedResult<BookSummary>>(HttpStatusCode.OK);
+        BookSummary book = Assert.Single(result.Items);
 
         Assert.Equal("Dune", book.Title);
         Assert.Equal("Frank Herbert", book.Author);
@@ -190,8 +188,8 @@ public class BookListTests : IntegrationTest
         });
 
         var response = await Client.GetAsync("/books?search=dune&page=2&pageSize=1");
-        PagedResult<BookInfo> result = await response.ReadJsonAs<PagedResult<BookInfo>>(HttpStatusCode.OK);
-        BookInfo book = Assert.Single(result.Items);
+        PagedResult<BookSummary> result = await response.ReadJsonAs<PagedResult<BookSummary>>(HttpStatusCode.OK);
+        BookSummary book = Assert.Single(result.Items);
 
         Assert.Equal("Dune Messiah", book.Title);
         Assert.Equal(2, result.Page);
@@ -221,7 +219,7 @@ public class BookListTests : IntegrationTest
         });
 
         var response = await Client.GetAsync("/books?search=java");
-        PagedResult<BookInfo> result = await response.ReadJsonAs<PagedResult<BookInfo>>(HttpStatusCode.OK);
+        PagedResult<BookSummary> result = await response.ReadJsonAs<PagedResult<BookSummary>>(HttpStatusCode.OK);
 
         Assert.Empty(result.Items);
         Assert.Equal(0, result.TotalItems);

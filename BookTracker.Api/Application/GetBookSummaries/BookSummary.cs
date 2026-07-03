@@ -1,6 +1,6 @@
-namespace BookTracker.Api.Application.BookList;
+namespace BookTracker.Api.Application.GetBookSummaries;
 
-public class BookInfo
+public class BookSummary
 {
     public int Id { get; set; }
     public required string Title { get; set; }

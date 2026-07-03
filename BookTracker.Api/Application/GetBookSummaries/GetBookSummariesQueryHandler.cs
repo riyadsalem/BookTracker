@@ -1,7 +1,7 @@
 using BookTracker.Api.Storage;
 using Microsoft.EntityFrameworkCore;
 
-namespace BookTracker.Api.Application.BookList;
+namespace BookTracker.Api.Application.GetBookSummaries;
 
 /* // hier gebruijk ik repo layer
 // Query > IRepo > Book(Entity) > DTOs
@@ -38,14 +38,14 @@ public class GetBookListQuery(AppDbContext dbContext)
 }
 */
 
-public class GetBookListQuery(AppDbContext dbContext)
+public class GetBookSummariesQueryHandler(AppDbContext dbContext)
 {
     private const int DefaultPage = 1;
     private const int DefaultPageSize = 10;
     private const int MinPage = 1;
     private const int MaxPageSize = 50;
 
-    public async Task<PagedResult<BookInfo>> Execute(GetBookListRequest request)
+    public async Task<PagedResult<BookSummary>> Execute(GetBookSummariesRequest request)
     {
         int page = Math.Max(1, request.Page ?? DefaultPage); // Math.Max(1, 3) >> 3 | Math.Max(1,-8) >> 1
         int pageSize = Math.Clamp(request.PageSize ?? DefaultPageSize, MinPage, MaxPageSize);
@@ -70,12 +70,12 @@ public class GetBookListQuery(AppDbContext dbContext)
 
         int totalItems = await query.CountAsync(); // EF Core 
 
-        List<BookInfo> books = await query.AsNoTracking() // Allen lezen
+        List<BookSummary> books = await query.AsNoTracking() // Allen lezen
                     .OrderBy(book => book.Id)
                     .Skip((page - 1) * pageSize) // (2 - 1) × 10 = 10
                     .Take(pageSize) // 10 DUS 10 books in page
                     .Select(book =>
-                        new BookInfo
+                        new BookSummary
                         {
                             Id = book.Id,
                             Title = book.Title.Value,
@@ -83,15 +83,14 @@ public class GetBookListQuery(AppDbContext dbContext)
                         })
                     .ToListAsync();
 
-        return
-            new PagedResult<BookInfo>
-            {
-                Items = books,
-                Page = page,
-                PageSize = pageSize,
-                TotalItems = totalItems,
-                TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize) // 95 / 10 = 9.5 >> Ceiling(9.5) -> 10
-            };
+        return new GetBookSummariesResponse
+        {
+            Items = books,
+            Page = page,
+            PageSize = pageSize,
+            TotalItems = totalItems,
+            TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize) // 95 / 10 = 9.5 >> Ceiling(9.5) -> 10
+        };
 
         /*
                 {

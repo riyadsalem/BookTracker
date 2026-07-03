@@ -1,10 +1,9 @@
-using BookTracker.Api.Application.BookList;
 using BookTracker.Api.Application.CreateBook;
 using BookTracker.Api.Application.DeleteBook;
-using BookTracker.Api.Application.GetBookById;
+using BookTracker.Api.Application.GetBookDetails;
+using BookTracker.Api.Application.GetBookSummaries;
 using BookTracker.Api.Application.UpdateBook;
 using BookTracker.Api.Domain;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BookTracker.Api.Endpoints;
 
@@ -12,8 +11,8 @@ public static class BookEndpoints
 {
     public static IEndpointRouteBuilder MapBookEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/books", GetAllBooks);
-        app.MapGet("/books/{id:int}", GetBookById);
+        app.MapGet("/books", GetBookSummaries);
+        app.MapGet("/books/{id:int}", GetBookDetails);
         app.MapPost("/books", CreateBook);
         app.MapPut("/books/{id:int}", UpdateBook);
         app.MapDelete("/books/{id:int}", DeleteBook);
@@ -24,12 +23,12 @@ public static class BookEndpoints
     request.page & request.pageSize
     GET /book?page=1&pageSize=10 >>>> [AsParameters] > ASP.NET lees page,pagesize van LINK
     */
-    public static async Task<IResult> GetAllBooks([AsParameters] GetBookListRequest request, GetBookListQuery query)
+    public static async Task<IResult> GetBookSummaries([AsParameters] GetBookSummariesRequest request, GetBookSummariesQueryHandler query)
     => Results.Ok(await query.Execute(request));
 
-    public static async Task<IResult> GetBookById(int id, GetBookByIdQuery query)
+    public static async Task<IResult> GetBookDetails(int id, GetBookDetailsQueryHandler query)
     {
-        BookDetails? book = await query.Execute(id);
+        GetBookDetailsResponse? book = await query.Execute(id);
         return book is null ? Results.NotFound() : Results.Ok(book);
     }
 

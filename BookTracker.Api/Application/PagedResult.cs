@@ -1,4 +1,4 @@
-namespace BookTracker.Api.Application;
+namespace BookTracker.Api.Application.GetBookSummaries;
 
 public class PagedResult<T>
 {

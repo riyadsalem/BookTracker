@@ -37,3 +37,10 @@ Content-Type: application/json
 ### Get Book by Id
 GET http://localhost:5172/books/8
 GET http://localhost:5172/books/9999
+
+
+### Get Books Page 1
+GET http://localhost:5172/books?page=1&pageSize=10
+
+### Get Books Page 2
+GET http://localhost:5172/books?page=2&pageSize=10

@@ -4,6 +4,7 @@ using BookTracker.Api.Application.DeleteBook;
 using BookTracker.Api.Application.GetBookById;
 using BookTracker.Api.Application.UpdateBook;
 using BookTracker.Api.Domain;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BookTracker.Api.Endpoints;
 
@@ -19,14 +20,16 @@ public static class BookEndpoints
         return app;
     }
 
-    public static async Task<IResult> GetAllBooks(GetBookListQuery query)
-    {
-        var books = await query.Execute();
-        return Results.Ok(books);
-    }
+    /*
+    request.page & request.pageSize
+    GET /book?page=1&pageSize=10 >>>> [AsParameters] > ASP.NET lees page,pagesize van LINK
+    */
+    public static async Task<IResult> GetAllBooks([AsParameters] GetBookListRequest request, GetBookListQuery query)
+    => Results.Ok(await query.Execute(request));
+
     public static async Task<IResult> GetBookById(int id, GetBookByIdQuery query)
     {
-        var book = await query.Execute(id);
+        BookDetails? book = await query.Execute(id);
         return book is null ? Results.NotFound() : Results.Ok(book);
     }
 

@@ -5,14 +5,6 @@ namespace BookTracker.Api.Storage;
 
 public class EfBookRepository(AppDbContext dbContext) : IBookRepository
 {
-    public async Task<IReadOnlyList<Book>> GetAllAsync() =>
-         await dbContext.Books.ToListAsync();
-
-
-    public async Task<Book?> GetByIdAsync(int id) =>
-         await dbContext.Books.FindAsync(id);
-
-
     public async Task<Book> AddAsync(Book book)
     {
         dbContext.Books.Add(book);

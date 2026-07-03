@@ -19,9 +19,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IBookRepository, EfBookRepository>();
 
-// builder.Services.AddScoped<BookService>();
+// builder.Services.AddScoped<BookService>(); // When zietne alle services in een file
 
-// SERVICE LAYER
+// SERVICE LAYER ((((I LIKE THAAAAAT))))
 builder.Services.AddScoped<GetBookListQuery>();
 builder.Services.AddScoped<GetBookByIdQuery>();
 builder.Services.AddScoped<CreateBookCommandHandler>();

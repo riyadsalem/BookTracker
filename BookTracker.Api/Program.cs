@@ -7,6 +7,7 @@ using BookTracker.Api.Application.GetBookById;
 using BookTracker.Api.Application.CreateBook;
 using BookTracker.Api.Application.UpdateBook;
 using BookTracker.Api.Application.DeleteBook;
+using BookTracker.Api.Seeding;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,16 +31,17 @@ builder.Services.AddScoped<DeleteBookCommandHandler>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment()) // SeedBooks is allen in Development Environment.... (Production NEEEEE)
 {
-    using var scope = app.Services.CreateScope();
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    scope.ServiceProvider
-        .GetRequiredService<AppDbContext>()
-        .Database
-        .EnsureCreated();
+        dbContext.Database.EnsureCreated();
+        if (builder.Configuration.GetValue<bool>("SeedDatabase"))
+            DatabaseSeeder.SeedBooks(dbContext, 500);
+    }
 }
-
 app.MapBookEndpoints();
 app.Run(); // NA ENDPOINT API
 

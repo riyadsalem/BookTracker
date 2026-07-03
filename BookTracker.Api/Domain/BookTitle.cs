@@ -15,6 +15,10 @@ public sealed record BookTitle
             throw new DomainException($"Title cannot be longer than {MaxLength} characters.");
         Value = cleaned;
     }
+    /*
+    When I request a String from a BookTitle, it gives me a Value.
+    book.Title.Value >> (string)book.Title
+    */
+    public static implicit operator string(BookTitle title) => title.Value;
     public override string ToString() => Value;
-
 }

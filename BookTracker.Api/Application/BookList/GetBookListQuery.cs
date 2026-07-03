@@ -47,29 +47,41 @@ public class GetBookListQuery(AppDbContext dbContext)
 
     public async Task<PagedResult<BookInfo>> Execute(GetBookListRequest request)
     {
-        var page = Math.Max(1, request.Page ?? DefaultPage); // Math.Max(1, 3) >> 3 | Math.Max(1,-8) >> 1
-        var pageSize = Math.Clamp(request.PageSize ?? DefaultPageSize, MinPage, MaxPageSize);
+        int page = Math.Max(1, request.Page ?? DefaultPage); // Math.Max(1, 3) >> 3 | Math.Max(1,-8) >> 1
+        int pageSize = Math.Clamp(request.PageSize ?? DefaultPageSize, MinPage, MaxPageSize);
         /*
         ?pageSize=20 > 20
         ?pageSize=100 > 50
         ?pageSize=0 > 1
         */
+        var query = dbContext.Books.AsNoTracking();
 
-        var totalItems = await dbContext.Books.CountAsync(); // EF Core 
 
-        var books = await dbContext.Books
-            .AsNoTracking() // Allen lezen
-            .OrderBy(book => book.Id)
-            .Skip((page - 1) * pageSize) // (2 - 1) × 10 = 10
-            .Take(pageSize) // 10 DUS 10 books in page
-            .Select(book =>
-                new BookInfo
-                {
-                    Id = book.Id,
-                    Title = book.Title.Value,
-                    Author = book.Author.Value
-                })
-            .ToListAsync();
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            // SQL (LIKE '%dune%') >>> It is looking for any text that contains the word dune.
+            var search = $"%{request.Search.Trim()}%";
+
+            query = query.Where(book =>
+            // (string)book.Title (DDD) >>>> book.Title.Value
+                EF.Functions.Like((string)book.Title, search) || // Like("Dune Messiah", "%dune%")
+                EF.Functions.Like((string)book.Author, search));
+        }
+
+        int totalItems = await query.CountAsync(); // EF Core 
+
+        List<BookInfo> books = await query.AsNoTracking() // Allen lezen
+                    .OrderBy(book => book.Id)
+                    .Skip((page - 1) * pageSize) // (2 - 1) × 10 = 10
+                    .Take(pageSize) // 10 DUS 10 books in page
+                    .Select(book =>
+                        new BookInfo
+                        {
+                            Id = book.Id,
+                            Title = book.Title.Value,
+                            Author = book.Author.Value
+                        })
+                    .ToListAsync();
 
         return
             new PagedResult<BookInfo>

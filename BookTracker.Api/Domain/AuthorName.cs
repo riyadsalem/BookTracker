@@ -15,10 +15,9 @@ public sealed record AuthorName
             throw new DomainException($"Author cannot be longer than {MaxLength} characters.");
         Value = cleaned;
     }
+
+    public static implicit operator string(AuthorName author) => author.Value;
     public override string ToString() => Value;
 
-    internal AuthorName HasMaxLength(int maxLength)
-    {
-        throw new NotImplementedException();
-    }
+
 }

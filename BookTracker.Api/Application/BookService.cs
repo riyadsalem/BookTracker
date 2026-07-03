@@ -15,8 +15,8 @@ public class BookService(IBookRepository bookRepository)
         return books.Select(book => new BookInfo
         {
             Id = book.Id,
-            Title = book.Title,
-            Author = book.Author
+            Title = book.Title.Value, // ValueObject van DB DUS book.Title.Value....
+            Author = book.Author.Value
         }).ToList();
     }
 
@@ -24,16 +24,16 @@ public class BookService(IBookRepository bookRepository)
     {
         Book? book = new Book
         {
-            Title = request.Title,
-            Author = request.Author,
+            Title = new BookTitle(request.Title), // ValueObject vooooor DB DUS new BookTitle()....
+            Author = new AuthorName(request.Author),
             Year = request.Year
         };
         await bookRepository.AddAsync(book);
         return new CreateBookResponse
         {
             Id = book.Id,
-            Title = book.Title,
-            Author = book.Author,
+            Title = book.Title.Value,
+            Author = book.Author.Value,
             Year = book.Year
         }
         ;
@@ -46,8 +46,8 @@ public class BookService(IBookRepository bookRepository)
          await bookRepository.UpdateAsync(new Book
          {
              Id = id,
-             Title = request.Title,
-             Author = request.Author,
+             Title = new BookTitle(request.Title),
+             Author = new AuthorName(request.Author),
              Year = request.Year
          });
 
@@ -60,8 +60,8 @@ public class BookService(IBookRepository bookRepository)
         return new BookDetails
         {
             Id = book.Id,
-            Title = book.Title,
-            Author = book.Author,
+            Title = book.Title.Value,
+            Author = book.Author.Value,
             Year = book.Year
         };
     }

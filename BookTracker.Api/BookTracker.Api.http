@@ -11,12 +11,12 @@ Content-Type: application/json
 }
 
 ### Delete Book
-DELETE http://localhost:5172/books/5
+DELETE http://localhost:5172/books/6
 DELETE http://localhost:5172/books/9999
 
 
 ### Update Book
-PUT http://localhost:5172/books/6
+PUT http://localhost:5172/books/7
 Content-Type: application/json
 
 {
@@ -35,5 +35,5 @@ Content-Type: application/json
 }
 
 ### Get Book by Id
-GET http://localhost:5172/books/6
+GET http://localhost:5172/books/7
 GET http://localhost:5172/books/9999

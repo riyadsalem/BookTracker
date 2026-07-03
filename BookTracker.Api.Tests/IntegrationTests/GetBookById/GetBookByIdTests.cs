@@ -15,8 +15,8 @@ public class GetBookByIdTests : IntegrationTest
             db.Books.Add(
                 new Book
                 {
-                    Title = "Dune",
-                    Author = "Frank Herbert",
+                    Title = new BookTitle("Dune"),
+                    Author = new AuthorName("Frank Herbert"),
                     Year = 1965
                 });
         });

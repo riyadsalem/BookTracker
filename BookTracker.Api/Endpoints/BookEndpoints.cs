@@ -1,6 +1,6 @@
-using BookTracker.Api.Application;
 using BookTracker.Api.Application.BookList;
 using BookTracker.Api.Application.CreateBook;
+using BookTracker.Api.Application.DeleteBook;
 using BookTracker.Api.Application.GetBookById;
 using BookTracker.Api.Application.UpdateBook;
 using BookTracker.Api.Domain;
@@ -30,11 +30,11 @@ public static class BookEndpoints
         return book is null ? Results.NotFound() : Results.Ok(book);
     }
 
-    public static async Task<IResult> CreateBook(CreateBookRequest request, BookService service)
+    public static async Task<IResult> CreateBook(CreateBookRequest request, CreateBookCommandHandler handler)
     {
         try
         {
-            CreateBookResponse response = await service.CreateBook(request);
+            CreateBookResponse response = await handler.Execute(request);
             return Results.Created($"/books/{response.Id}", response);
         }
         catch (DomainException exception)
@@ -42,11 +42,11 @@ public static class BookEndpoints
             return Results.BadRequest(new { error = exception.Message });
         }
     }
-    public static async Task<IResult> UpdateBook(int id, UpdateBookRequest request, BookService service)
+    public static async Task<IResult> UpdateBook(int id, UpdateBookRequest request, UpdateBookCommandHandler handler)
     {
         try
         {
-            return await service.UpdateBook(id, request) ? Results.NoContent() : Results.NotFound();
+            return await handler.Execute(id, request) ? Results.NoContent() : Results.NotFound();
             // Results.NotFound() (Errors hier van req(ID IS NOT FOUND)) >> 404
         }
         catch (DomainException exception)
@@ -57,7 +57,7 @@ public static class BookEndpoints
 
     }
 
-    public static async Task<IResult> DeleteBook(int id, BookService service) =>
-    await service.DeleteBook(id) ? Results.NoContent() : Results.NotFound();
+    public static async Task<IResult> DeleteBook(int id, DeleteBookCommandHandler handler) =>
+    await handler.Execute(id) ? Results.NoContent() : Results.NotFound();
 
 }

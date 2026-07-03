@@ -17,8 +17,9 @@ public class CreateBookTests : IntegrationTest
             Author = "Carson McCullers",
             Year = 1940
         };
+
         var response = await Client.PostAsJsonAsync("/books", request);
-        CreateBookResponse? created = await response.Content.ReadFromJsonAsync<CreateBookResponse>();
+        CreateBookResponse? created = await response.ReadJsonAs<CreateBookResponse>(HttpStatusCode.Created);
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         Assert.NotNull(created);
@@ -44,6 +45,7 @@ public class CreateBookTests : IntegrationTest
         };
 
         var response = await Client.PostAsJsonAsync("/books", request);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        //  Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        await response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
     }
 }

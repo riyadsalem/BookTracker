@@ -22,7 +22,7 @@ public class GetBookByIdTests : IntegrationTest
         });
 
         var response = await Client.GetAsync("/books/1");
-        BookDetails? book = await response.Content.ReadFromJsonAsync<BookDetails>();
+        BookDetails? book = await response.ReadJsonAs<BookDetails>(HttpStatusCode.OK);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(book);
@@ -36,7 +36,8 @@ public class GetBookByIdTests : IntegrationTest
     public async Task GetBookByIdReturnsNotFoundWhenBookDoesNotExist()
     {
         var response = await Client.GetAsync("/books/9999");
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        // Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        await response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
 
     }
 }

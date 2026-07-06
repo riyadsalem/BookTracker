@@ -1,7 +1,8 @@
+using BookTracker.Api.Application.GetBookSummaries;
 using BookTracker.Api.Storage;
 using Microsoft.EntityFrameworkCore;
 
-namespace BookTracker.Api.Application.GetBookSummaries;
+namespace BookTracker.Api.Application.Books.GetBookSummaries;
 
 /* // hier gebruijk ik repo layer
 // Query > IRepo > Book(Entity) > DTOs

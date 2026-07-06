@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using BookTracker.Api.Application.Books.GetBookSummaries;
 using BookTracker.Api.Application.GetBookSummaries;
 using BookTracker.Api.Domain.Books;
 
@@ -28,10 +29,10 @@ public class BookListTests : IntegrationTest
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(result);
 
-        BookSummary BookSummary = Assert.Single(result.Items);
+        BookSummary Booksummary = Assert.Single(result.Items);
 
-        Assert.Equal("Cannery Row", BookSummary.Title);
-        Assert.Equal("John Steinbeck", BookSummary.Author);
+        Assert.Equal("Cannery Row", Booksummary.Title);
+        Assert.Equal("John Steinbeck", Booksummary.Author);
         Assert.Equal(1, result.Page);
         Assert.Equal(10, result.PageSize);
         Assert.Equal(1, result.TotalItems);

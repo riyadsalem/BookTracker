@@ -1,9 +1,8 @@
-namespace BookTracker.Api.Application.GetBookSummaries;
+namespace BookTracker.Api.Application.Members.GetMemberSummaries;
 
-public class GetBookSummariesRequest
+public class GetMemberSummariesRequest
 {
     public int? Page { get; set; }
     public int? PageSize { get; set; }
     public string? Search { get; set; }
-
 }

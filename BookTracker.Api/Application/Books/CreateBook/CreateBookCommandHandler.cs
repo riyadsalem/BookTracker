@@ -1,7 +1,7 @@
 using BookTracker.Api.Domain.Books;
 using BookTracker.Api.Storage.Books;
 
-namespace BookTracker.Api.Application.CreateBook;
+namespace BookTracker.Api.Application.Books.CreateBook;
 
 public class CreateBookCommandHandler(IBookRepository bookRepository) : IHandler
 {
@@ -25,3 +25,4 @@ public class CreateBookCommandHandler(IBookRepository bookRepository) : IHandler
         };
     }
 }
+

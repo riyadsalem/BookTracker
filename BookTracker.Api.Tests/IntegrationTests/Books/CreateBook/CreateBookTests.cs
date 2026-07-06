@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using BookTracker.Api.Application.CreateBook;
+using BookTracker.Api.Application.Books.CreateBook;
 using BookTracker.Api.Domain.Books;
 
 namespace BookTracker.Api.Tests.IntegrationTests.CreateBook;

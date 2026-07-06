@@ -7,8 +7,3 @@ public class GetBookSummariesRequest
     public string? Search { get; set; }
 
 }
-
-
-/*
-
-*/

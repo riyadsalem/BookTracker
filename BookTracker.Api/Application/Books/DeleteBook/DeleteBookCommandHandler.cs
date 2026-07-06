@@ -1,5 +1,4 @@
 using BookTracker.Api.Storage.Books;
-
 namespace BookTracker.Api.Application.Books.DeleteBook;
 
 public class DeleteBookCommandHandler(IBookRepository bookRepository) : IHandler

@@ -1,6 +1,6 @@
-using BookTracker.Api.Domain;
+using BookTracker.Api.Domain.Books;
 
-namespace BookTracker.Api.Storage;
+namespace BookTracker.Api.Storage.Books;
 
 public interface IBookRepository
 {

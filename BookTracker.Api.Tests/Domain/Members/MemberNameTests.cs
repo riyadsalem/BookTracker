@@ -8,15 +8,15 @@ public class MemberNameTests
     [Fact]
     public void MemberNameAcceptsValidName()
     {
-        MemberName author = new MemberName("Riyad");
-        Assert.Equal("Riyad", author.Value);
+        MemberName member = new MemberName("Riyad");
+        Assert.Equal("Riyad", member.Value);
     }
 
     [Fact]
     public void MemberNameTrimsValue()
     {
-        AuthorName author = new AuthorName("  Riyad  ");
-        Assert.Equal("Riyad", author.Value);
+        MemberName member = new MemberName("  Riyad  ");
+        Assert.Equal("Riyad", member.Value);
     }
 
 

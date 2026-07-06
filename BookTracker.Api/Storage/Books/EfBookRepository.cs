@@ -1,7 +1,7 @@
-using BookTracker.Api.Domain;
-using Microsoft.EntityFrameworkCore;
 
-namespace BookTracker.Api.Storage;
+using BookTracker.Api.Domain.Books;
+
+namespace BookTracker.Api.Storage.Books;
 
 public class EfBookRepository(AppDbContext dbContext) : IBookRepository
 {
@@ -11,7 +11,6 @@ public class EfBookRepository(AppDbContext dbContext) : IBookRepository
         await dbContext.SaveChangesAsync();
         return book;
     }
-
     public async Task<bool> DeleteAsync(int id)
     {
         Book? book = await dbContext.Books.FindAsync(id);
@@ -35,4 +34,6 @@ public class EfBookRepository(AppDbContext dbContext) : IBookRepository
         await dbContext.SaveChangesAsync();
         return true;
     }
+
 }
+

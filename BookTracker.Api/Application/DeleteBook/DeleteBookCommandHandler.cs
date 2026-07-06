@@ -1,4 +1,4 @@
-using BookTracker.Api.Storage;
+using BookTracker.Api.Storage.Books;
 
 namespace BookTracker.Api.Application.DeleteBook;
 

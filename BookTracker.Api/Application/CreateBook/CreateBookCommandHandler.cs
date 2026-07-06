@@ -1,5 +1,5 @@
-using BookTracker.Api.Domain;
-using BookTracker.Api.Storage;
+using BookTracker.Api.Domain.Books;
+using BookTracker.Api.Storage.Books;
 
 namespace BookTracker.Api.Application.CreateBook;
 

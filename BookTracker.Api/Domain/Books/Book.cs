@@ -1,4 +1,4 @@
-namespace BookTracker.Api.Domain;
+namespace BookTracker.Api.Domain.Books;
 
 public class Book
 {

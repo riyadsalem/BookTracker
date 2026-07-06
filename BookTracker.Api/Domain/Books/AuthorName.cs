@@ -19,5 +19,5 @@ public sealed record AuthorName
     public static implicit operator string(AuthorName author) => author.Value;
     public override string ToString() => Value;
 
-
 }
+

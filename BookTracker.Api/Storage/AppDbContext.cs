@@ -1,4 +1,3 @@
-using System.IO.MemoryMappedFiles;
 using BookTracker.Api.Domain.Books;
 using BookTracker.Api.Domain.Members;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +9,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 {
     public DbSet<Book> Books => Set<Book>(); // Table in DB
     public DbSet<Member> Members => Set<Member>();
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Book Table

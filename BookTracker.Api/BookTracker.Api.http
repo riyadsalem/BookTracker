@@ -53,7 +53,6 @@ GET http://localhost:5172/books?search=YAA
 GET http://localhost:5172/books?search=dune&page=1&pageSize=5
 
 
-
 ### MEMBERS
 ### Get Members
 GET http://localhost:5172/members
@@ -85,3 +84,52 @@ Content-Type: application/json
 ###
 
 DELETE http://localhost:5172/members/1
+
+
+### SEARCH BUG - BOOKS
+POST http://localhost:5172/books
+Content-Type: application/json
+
+{
+  "title": "50% Off Sale",
+  "author": "Some Author",
+  "year": 2020
+}
+
+POST http://localhost:5172/books
+Content-Type: application/json
+
+{
+  "title": "_Riyad Off Sale",
+  "author": "Some Author",
+  "year": 2020
+}
+
+### 2. Search for (% _)... should return ONLY the book above, not all books
+### Search for the literal ((%)) character.
+### '%' must be URL-encoded as '%25'. (For example, '%50' is decoded to 'P', not '%'.)
+GET http://localhost:5172/books?search=%25&page=1&pageSize=5
+GET http://localhost:5172/books?search=_&page=1&pageSize=5
+
+
+### SEARCH BUG - MEMBERS
+
+### 3. Add a member with a literal % in the name
+POST http://localhost:5172/members
+Content-Type: application/json
+
+{
+    "name": "100% Riyad",
+    "email": "riyad100@example.com"
+}
+POST http://localhost:5172/members
+Content-Type: application/json
+
+{
+    "name": "_ Riyad",
+    "email": "riyad100@example.com"
+}
+
+### 4. Search for (% _)... should return ONLY the member above, not all members
+GET http://localhost:5172/members?search=%25&page=1&pageSize=5
+GET http://localhost:5172/members?search=_&page=1&pageSize=5

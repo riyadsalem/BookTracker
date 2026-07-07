@@ -1,43 +1,7 @@
 using BookTracker.Api.Application.GetBookSummaries;
 using BookTracker.Api.Storage;
 using Microsoft.EntityFrameworkCore;
-
 namespace BookTracker.Api.Application.Books.GetBookSummaries;
-
-/* // hier gebruijk ik repo layer
-// Query > IRepo > Book(Entity) > DTOs
-public class GetBookListQuery(IBookRepository bookRepository)
-{
-    public async Task<IReadOnlyList<BookInfo>> Execute()
-    {
-        var books = await bookRepository.GetAllAsync();
-        return books.Select(book => new BookInfo
-        {
-            Id = book.Id,
-            Title = book.Title.Value, // ValueObject van DB DUS book.Title.Value....
-            Author = book.Author.Value
-        }).ToList();
-    }
-}
-*/
-
-/*
-// zonder paging
-// zonder repo layer 
-// Query > AppDbContext > DTOs (((SNELLER)))
-// Direct projection to DTOs (no Repository, no Entity loading).
-public class GetBookListQuery(AppDbContext dbContext)
-{
-    public async Task<IReadOnlyList<BookInfo>> Execute(GetBookListRequest request) =>
-    await dbContext.Books.AsNoTracking().Select(book => new BookInfo
-    {
-        Id = book.Id,
-        Title = book.Title.Value,
-        Author = book.Author.Value
-    }).ToListAsync();
-
-}
-*/
 
 public class GetBookSummariesQueryHandler(AppDbContext dbContext) : IHandler
 {
@@ -60,13 +24,28 @@ public class GetBookSummariesQueryHandler(AppDbContext dbContext) : IHandler
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
+            /*
+            (% _) are special characters in SQL LIKE.
+            % > (any text (even empty))
+            _ > any single character
+            If the user types % as their search word, without fixing this, SQL would read it as (Match anything) 
+            instead of (find rows that contain a % character)
+            */
+
+            // 100%_C# >> 100\%\_C#
+            // Escape '%' and '_' so SQL searches for them as text,
+            // not as LIKE wildcard characters.
+            String searchResult = request.Search.Trim().Replace("%", "\\%").Replace("_", "\\_");
+
+
             // SQL (LIKE '%dune%') >>> It is looking for any text that contains the word dune.
-            var search = $"%{request.Search.Trim()}%";
+            String search = $"%{searchResult}%";
 
             query = query.Where(book =>
-            // (string)book.Title (DDD) >>>> book.Title.Value
-                EF.Functions.Like((string)book.Title, search) || // Like("Dune Messiah", "%dune%")
-                EF.Functions.Like((string)book.Author, search));
+                // (string)book.Title (DDD) >>>> book.Title.Value
+                // Tell SQL that '\' is the escape character, so '%' and '_' are treated as normal characters.
+                EF.Functions.Like((string)book.Title, search, "\\") || // Like("Dune Messiah", "%dune%")
+                EF.Functions.Like((string)book.Author, search, "\\"));
         }
 
         int totalItems = await query.CountAsync(); // EF Core 

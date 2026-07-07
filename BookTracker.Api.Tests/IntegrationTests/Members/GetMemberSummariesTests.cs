@@ -126,4 +126,56 @@ public class GetMemberSummariesTests : IntegrationTest
         Assert.Equal(1, result.PageSize);
     }
 
+    [Fact]
+    public async Task SearchByPercentSignReturnsExactMatch()
+    {
+        Writer.Seed(db =>
+        {
+            db.Members.Add(new Member
+            {
+                Name = new MemberName("1% Riyad"),
+                Email = new MemberEmail("r@gmail.com")
+            });
+
+            db.Members.Add(new Member
+            {
+                Name = new MemberName("Mark"),
+                Email = new MemberEmail("m@test.com")
+            });
+        });
+
+        var response = await Client.GetAsync("/members?search=%25");
+        GetMemberSummariesResponse result = await response.ReadJsonAs<GetMemberSummariesResponse>(HttpStatusCode.OK);
+
+        MemberSummary member = Assert.Single(result.Items);
+        Assert.Equal("1% Riyad", member.Name);
+        Assert.Equal(1, result.TotalItems);
+    }
+
+    [Fact]
+    public async Task SearchByUnderscoreReturnsExactMatch()
+    {
+        Writer.Seed(db =>
+        {
+            db.Members.Add(new Member
+            {
+                Name = new MemberName("_ Riyad"),
+                Email = new MemberEmail("r@gmail.com")
+            });
+
+            db.Members.Add(new Member
+            {
+                Name = new MemberName("Mark"),
+                Email = new MemberEmail("m@test.com")
+            });
+        });
+
+        var response = await Client.GetAsync("/members?search=_ Riyad");
+        GetMemberSummariesResponse result = await response.ReadJsonAs<GetMemberSummariesResponse>(HttpStatusCode.OK);
+
+        MemberSummary member = Assert.Single(result.Items);
+        Assert.Equal("_ Riyad", member.Name);
+        Assert.Equal(1, result.TotalItems);
+    }
+
 }

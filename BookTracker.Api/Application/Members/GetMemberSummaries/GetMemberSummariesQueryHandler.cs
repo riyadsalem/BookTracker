@@ -18,11 +18,12 @@ public class GetMemberSummariesQueryHandler(AppDbContext dbContext) : IHandler
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
-            var search = $"%{request.Search.Trim()}%";
+            String searchResult = request.Search.Trim().Replace("%", "\\%").Replace("_", "\\_");
+            String search = $"%{searchResult}%";
 
             query = query.Where(member =>
-                EF.Functions.Like((string)member.Name, search) ||
-                EF.Functions.Like((string)member.Email, search));
+                EF.Functions.Like((string)member.Name, search, "\\") ||
+                EF.Functions.Like((string)member.Email, search, "\\"));
         }
 
         int totalItems = await query.CountAsync();

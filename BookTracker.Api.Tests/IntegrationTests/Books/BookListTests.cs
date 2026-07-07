@@ -234,5 +234,63 @@ public class BookListTests : IntegrationTest
         Assert.Equal(0, result.TotalPages);
     }
 
+    [Fact]
+    public async Task SearchByPercentSignReturnsExactMatch()
+    {
+        Writer.Seed(db =>
+        {
+            db.Books.AddRange(
+                new Book
+                {
+                    Title = new BookTitle("50% World"),
+                    Author = new AuthorName("Riyad"),
+                    Year = 2029
+                },
+                new Book
+                {
+                    Title = new BookTitle("THINDINGTEST"),
+                    Author = new AuthorName("Mark"),
+                    Year = 2006
+                });
+        });
+
+        var response = await Client.GetAsync("/books?search=%25");
+        PagedResult<BookSummary> result = await response.ReadJsonAs<PagedResult<BookSummary>>(HttpStatusCode.OK);
+
+        BookSummary book = Assert.Single(result.Items);
+        Assert.Equal("50% World", book.Title);
+        Assert.Equal(1, result.TotalItems);
+
+    }
+
+
+    [Fact]
+    public async Task SearchByUnderscoreReturnsExactMatch()
+    {
+        Writer.Seed(db =>
+        {
+            db.Books.AddRange(
+                new Book
+                {
+                    Title = new BookTitle("_OORLOG"),
+                    Author = new AuthorName("Riyad"),
+                    Year = 2029
+                },
+                new Book
+                {
+                    Title = new BookTitle("THINDINGTEST"),
+                    Author = new AuthorName("Mark"),
+                    Year = 2006
+                });
+        });
+
+        var response = await Client.GetAsync("/books?search=_OORLOG");
+        PagedResult<BookSummary> result = await response.ReadJsonAs<PagedResult<BookSummary>>(HttpStatusCode.OK);
+
+        BookSummary book = Assert.Single(result.Items);
+        Assert.Equal("_OORLOG", book.Title);
+        Assert.Equal(1, result.TotalItems);
+    }
+
 }
 

@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using BookTracker.Api.Application.Books.UpdateBook;
 using BookTracker.Api.Domain.Books;
 
-namespace BookTracker.Api.Tests.IntegrationTests.UpdateBook;
+namespace BookTracker.Api.Tests.IntegrationTests.Books;
 
 public class UpdateBookTests : IntegrationTest
 {
@@ -58,3 +58,4 @@ public class UpdateBookTests : IntegrationTest
         await response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
     }
 }
+

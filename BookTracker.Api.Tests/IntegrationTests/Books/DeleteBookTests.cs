@@ -1,7 +1,7 @@
 using System.Net;
 using BookTracker.Api.Domain.Books;
 
-namespace BookTracker.Api.Tests.IntegrationTests.DeleteBook;
+namespace BookTracker.Api.Tests.IntegrationTests.Books;
 
 public class DeleteBookTests : IntegrationTest
 {
@@ -36,3 +36,4 @@ public class DeleteBookTests : IntegrationTest
         await response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
     }
 }
+

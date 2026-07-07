@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using BookTracker.Api.Application.Books.CreateBook;
 using BookTracker.Api.Domain.Books;
 
-namespace BookTracker.Api.Tests.IntegrationTests.CreateBook;
+namespace BookTracker.Api.Tests.IntegrationTests.Books;
 
 public class CreateBookTests : IntegrationTest
 {
@@ -18,6 +18,10 @@ public class CreateBookTests : IntegrationTest
             Year = 1940
         };
 
+        /*
+        zoals >> React -> POST /books
+        EN ASP.NET call (bookEndpoints.CreateBook THEN CreateBookCommandHandler THEN EFBookRepository THEN SQLite THEN ((201 Created)))
+        */
         var response = await Client.PostAsJsonAsync("/books", request);
         CreateBookResponse? created = await response.ReadJsonAs<CreateBookResponse>(HttpStatusCode.Created);
 
@@ -26,7 +30,7 @@ public class CreateBookTests : IntegrationTest
         Assert.True(created.Id > 0);
         Assert.Equal("The Heart Is a Lonely Hunter", created.Title);
 
-        Book? book = Reader.Query(context => context.Find<Book>(created!.Id));
+        Book? book = Reader.Query(context => context.Find<Book>(created!.Id)); // READ >> IS Book actually inside SQLite.... OF Niet
 
         Assert.NotNull(book);
         Assert.Equal("The Heart Is a Lonely Hunter", book.Title.Value);

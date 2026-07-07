@@ -4,7 +4,7 @@ using BookTracker.Api.Application.Books.GetBookSummaries;
 using BookTracker.Api.Application.GetBookSummaries;
 using BookTracker.Api.Domain.Books;
 
-namespace BookTracker.Api.Tests.IntegrationTests.BookList;
+namespace BookTracker.Api.Tests.IntegrationTests.Books;
 
 public class BookListTests : IntegrationTest
 {
@@ -42,6 +42,11 @@ public class BookListTests : IntegrationTest
     [Fact]
     public async Task GetBooksReturnsRequestedPage()
     {
+        /*
+        For example.. I want to test ::: But the DB is empty ((How would i GETBOOKS that doesn't exist??))
+        SO... before testing, I ADDBOOKS
+        */
+        // Prepare the environment.. (Arrange)
         Writer.Seed(db =>
         {
             db.Books.AddRange(
@@ -65,8 +70,10 @@ public class BookListTests : IntegrationTest
                 });
         });
 
+        // EXECUTE (Act)
         PagedResult<BookSummary>? result = await Client.GetFromJsonAsync<PagedResult<BookSummary>>("/books?page=2&pageSize=1");
 
+        // Assert
         Assert.NotNull(result);
 
         BookSummary book = Assert.Single(result.Items);
@@ -228,3 +235,4 @@ public class BookListTests : IntegrationTest
     }
 
 }
+

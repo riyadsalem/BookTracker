@@ -12,7 +12,7 @@ public class UpdateBookCommandHandler(IBookRepository bookRepository) : IHandler
             Id = id,
             Title = new BookTitle(request.Title),
             Author = new AuthorName(request.Author),
-            Year = request.Year
+            Year = new PublicationYear(request.Year)
         };
 
         return await bookRepository.UpdateAsync(book);

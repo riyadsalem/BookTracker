@@ -15,15 +15,17 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         modelBuilder.Entity<Book>(book =>
         {
             book.Property(b => b.Title)
-                .HasConversion(
-                    title => title.Value,
-                    value => new BookTitle(value))
+                .HasConversion(title => title.Value, value => new BookTitle(value))
                 .HasMaxLength(BookTitle.MaxLength);
+
             book.Property(b => b.Author)
             .HasConversion(author => author.Value, value => new AuthorName(value))
             // author => author.Value >> TO DB (SAVE)
-            // value => new AuthorName(value) >> VAN DB (READ)
+            // value => new AuthorName(value) >> VAN DB (READ)5
             .HasMaxLength(AuthorName.MaxLength); // Author nvarchar(100) IN DB 
+
+            book.Property(b => b.Year)
+            .HasConversion(year => year.Value, value => new PublicationYear(value));
         });
 
         // Member Table

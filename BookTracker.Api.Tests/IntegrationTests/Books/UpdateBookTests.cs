@@ -17,7 +17,7 @@ public class UpdateBookTests : IntegrationTest
                 {
                     Title = new BookTitle("Dune"),
                     Author = new AuthorName("Frank Herbert"),
-                    Year = 1965
+                    Year = new PublicationYear(1965)
                 });
         });
 
@@ -57,5 +57,32 @@ public class UpdateBookTests : IntegrationTest
         //  Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         await response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
     }
+
+    [Fact]
+    public async Task PutBookReturnsBadRequestWhenYearIsOutOfRange()
+    {
+        Writer.Seed(db =>
+        {
+            db.Books.Add(
+                new Book
+                {
+                    Title = new BookTitle("Dune"),
+                    Author = new AuthorName("Frank Herbert"),
+                    Year = new PublicationYear(1965)
+                });
+        });
+
+        UpdateBookRequest request =
+            new UpdateBookRequest
+            {
+                Title = "Dune Messiah",
+                Author = "Frank Herbert",
+                Year = 1
+            };
+
+        var response = await Client.PutAsJsonAsync("/books/1", request);
+        await response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
+    }
+
 }
 

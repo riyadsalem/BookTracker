@@ -16,7 +16,7 @@ public class BookListTests : IntegrationTest
             {
                 Title = new BookTitle("Cannery Row"),
                 Author = new AuthorName("John Steinbeck"),
-                Year = 1945
+                Year = new PublicationYear(1945)
             }
         ));
 
@@ -54,19 +54,19 @@ public class BookListTests : IntegrationTest
                 {
                     Title = new BookTitle("Book 1"),
                     Author = new AuthorName("Author 1"),
-                    Year = 2001
+                    Year = new PublicationYear(2001)
                 },
                 new Book
                 {
                     Title = new BookTitle("Book 2"),
                     Author = new AuthorName("Author 2"),
-                    Year = 2002
+                    Year = new PublicationYear(2002)
                 },
                 new Book
                 {
                     Title = new BookTitle("Book 3"),
                     Author = new AuthorName("Author 3"),
-                    Year = 2003
+                    Year = new PublicationYear(2003)
                 });
         });
 
@@ -95,7 +95,7 @@ public class BookListTests : IntegrationTest
                 {
                     Title = new BookTitle("Book 1"),
                     Author = new AuthorName("Author 1"),
-                    Year = 2001
+                    Year = new PublicationYear(2001)
                 });
         });
 
@@ -119,13 +119,13 @@ public class BookListTests : IntegrationTest
                 {
                     Title = new BookTitle("Dune"),
                     Author = new AuthorName("Frank Herbert"),
-                    Year = 1965
+                    Year = new PublicationYear(1965)
                 },
                 new Book
                 {
                     Title = new BookTitle("The Big Sleep"),
                     Author = new AuthorName("Raymond Chandler"),
-                    Year = 1939
+                    Year = new PublicationYear(1939)
                 });
         });
 
@@ -149,13 +149,13 @@ public class BookListTests : IntegrationTest
                 {
                     Title = new BookTitle("Dune"),
                     Author = new AuthorName("Frank Herbert"),
-                    Year = 1965
+                    Year = new PublicationYear(1965)
                 },
                 new Book
                 {
                     Title = new BookTitle("The Big Sleep"),
                     Author = new AuthorName("Raymond Chandler"),
-                    Year = 1939
+                    Year = new PublicationYear(1939)
                 });
         });
 
@@ -179,19 +179,19 @@ public class BookListTests : IntegrationTest
                 {
                     Title = new BookTitle("Dune"),
                     Author = new AuthorName("Frank Herbert"),
-                    Year = 1965
+                    Year = new PublicationYear(1965)
                 },
                 new Book
                 {
                     Title = new BookTitle("Dune Messiah"),
                     Author = new AuthorName("Frank Herbert"),
-                    Year = 1969
+                    Year = new PublicationYear(1969)
                 },
                 new Book
                 {
                     Title = new BookTitle("The Big Sleep"),
                     Author = new AuthorName("Raymond Chandler"),
-                    Year = 1939
+                    Year = new PublicationYear(1939)
                 });
         });
 
@@ -216,13 +216,13 @@ public class BookListTests : IntegrationTest
                 {
                     Title = new BookTitle("Dune"),
                     Author = new AuthorName("Frank Herbert"),
-                    Year = 1965
+                    Year = new PublicationYear(1965)
                 },
                 new Book
                 {
                     Title = new BookTitle("The Big Sleep"),
                     Author = new AuthorName("Raymond Chandler"),
-                    Year = 1939
+                    Year = new PublicationYear(1939)
                 });
         });
 
@@ -244,13 +244,13 @@ public class BookListTests : IntegrationTest
                 {
                     Title = new BookTitle("50% World"),
                     Author = new AuthorName("Riyad"),
-                    Year = 2029
+                    Year = new PublicationYear(2001)
                 },
                 new Book
                 {
                     Title = new BookTitle("THINDINGTEST"),
                     Author = new AuthorName("Mark"),
-                    Year = 2006
+                    Year = new PublicationYear(2006)
                 });
         });
 
@@ -274,13 +274,13 @@ public class BookListTests : IntegrationTest
                 {
                     Title = new BookTitle("_OORLOG"),
                     Author = new AuthorName("Riyad"),
-                    Year = 2029
+                    Year = new PublicationYear(2026)
                 },
                 new Book
                 {
                     Title = new BookTitle("THINDINGTEST"),
                     Author = new AuthorName("Mark"),
-                    Year = 2006
+                    Year = new PublicationYear(2006)
                 });
         });
 

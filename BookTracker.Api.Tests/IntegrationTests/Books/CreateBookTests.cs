@@ -52,4 +52,33 @@ public class CreateBookTests : IntegrationTest
         //  Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         await response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
     }
+
+    [Fact]
+    public async Task PostBookReturnsBadRequestWhenYearIsTooLow()
+    {
+        CreateBookRequest request = new()
+        {
+            Title = "Leven",
+            Author = "IK",
+            Year = -99999
+        };
+
+        var response = await Client.PostAsJsonAsync("/books", request);
+        await response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task PostBookReturnsBadRequestWhenYearIsTooHigh()
+    {
+        CreateBookRequest request = new()
+        {
+            Title = "Toekomst",
+            Author = "Jij",
+            Year = 99999
+        };
+
+        var response = await Client.PostAsJsonAsync("/books", request);
+        await response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
+    }
+
 }

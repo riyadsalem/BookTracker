@@ -16,7 +16,7 @@ public class DeleteBookTests : IntegrationTest
                     Id = 1,
                     Title = new BookTitle("Dune"),
                     Author = new AuthorName("Frank Herbert"),
-                    Year = 1965
+                    Year = new PublicationYear(1965)
                 });
         });
 

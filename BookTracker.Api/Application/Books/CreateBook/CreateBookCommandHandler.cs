@@ -11,7 +11,7 @@ public class CreateBookCommandHandler(IBookRepository bookRepository) : IHandler
         {
             Title = new BookTitle(request.Title),
             Author = new AuthorName(request.Author),
-            Year = request.Year
+            Year = new PublicationYear(request.Year)
         };
 
         Book savedBook = await bookRepository.AddAsync(book);

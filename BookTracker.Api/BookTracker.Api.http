@@ -11,6 +11,24 @@ Content-Type: application/json
   "year": 1965
 }
 
+### Create Book (...BadRequest((YearIsOutOfRange)))
+POST http://localhost:5172/books
+Content-Type: application/json
+
+{
+  "title": "Time Traveler's Book",
+  "author": "Someone",
+  "year": -9
+}
+POST http://localhost:5172/books
+Content-Type: application/json
+
+{
+  "title": "Future Book",
+  "author": "Someone",
+  "year": 9
+}
+
 ### Delete Book
 DELETE http://localhost:5172/books/3
 DELETE http://localhost:5172/books/9999

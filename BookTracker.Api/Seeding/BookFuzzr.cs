@@ -110,6 +110,6 @@ public static class BookFuzzr
         {
             Title = new BookTitle(title),
             Author = new AuthorName(author),
-            Year = year
+            Year = new PublicationYear(year)
         };
 }

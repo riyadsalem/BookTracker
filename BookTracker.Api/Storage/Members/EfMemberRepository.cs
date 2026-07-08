@@ -1,4 +1,5 @@
 using BookTracker.Api.Domain.Members;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookTracker.Api.Storage.Members;
 
@@ -21,8 +22,6 @@ public class EfMemberRepository(AppDbContext dbContext) : IMemberRepository
         return true;
     }
 
-
-
     public async Task<bool> UpdateAsync(Member member)
     {
         Member? existing = await dbContext.Members.FindAsync(member.Id);
@@ -36,5 +35,12 @@ public class EfMemberRepository(AppDbContext dbContext) : IMemberRepository
 
         return true;
     }
+
+    public async Task<bool> EmailExistsAsync(MemberEmail email, int? memberIdToIgnore = null) =>
+    await dbContext.Members
+    .Where(member => member.Email == email)
+    .Where(member => memberIdToIgnore == null || member.Id != memberIdToIgnore)
+    .AnyAsync();
+
 }
 

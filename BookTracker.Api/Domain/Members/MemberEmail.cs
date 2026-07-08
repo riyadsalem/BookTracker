@@ -9,7 +9,7 @@ public record MemberEmail
         if (string.IsNullOrWhiteSpace(value))
             throw new DomainException("Email is required.");
 
-        value = value.Trim();
+        value = value.Trim().ToLowerInvariant();
 
         if (value.Length > MaxLength)
             throw new DomainException($"Email cannot exceed {MaxLength} characters.");

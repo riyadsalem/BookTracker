@@ -37,4 +37,8 @@ public class MemberEmailTests
     public void MemberEmailRejectsNull() =>
     Assert.Throws<DomainException>(() => new MemberEmail(null!));
 
+    [Fact]
+    public void MemberEmailNormalizesValue() =>
+    Assert.Equal("riyad@riyad.com", new MemberEmail("  riyad@riyad.com  ").Value);
+
 }

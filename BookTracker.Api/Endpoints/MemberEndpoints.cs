@@ -1,3 +1,4 @@
+using BookTracker.Api.Application.Members;
 using BookTracker.Api.Application.Members.CreateMember;
 using BookTracker.Api.Application.Members.DeleteMember;
 using BookTracker.Api.Application.Members.GetMemberDetails;
@@ -37,6 +38,10 @@ public static class MemberEndpoints
             CreateMemberResponse response = await handler.Execute(request);
             return Results.Created($"/members/{response.Id}", response);
         }
+        catch (MemberEmailAlreadyExistsException exception)
+        {
+            return Results.Conflict(new { error = exception.Message });
+        }
         catch (DomainException exception)
         {
             return Results.BadRequest(new { error = exception.Message });
@@ -47,6 +52,10 @@ public static class MemberEndpoints
         try
         {
             return await handler.Execute(id, request) ? Results.NoContent() : Results.NotFound();
+        }
+        catch (MemberEmailAlreadyExistsException exception)
+        {
+            return Results.Conflict(new { error = exception.Message });
         }
         catch (DomainException exception)
         {

@@ -14,13 +14,15 @@ public class GetMemberSummariesTests : IntegrationTest
             db.Members.Add(new Member
             {
                 Name = new MemberName("Riyad"),
-                Email = new MemberEmail("riyad@gmail.com")
+                Email = new MemberEmail("riyad@gmail.com"),
+                PasswordHash = "123456789"
             });
 
             db.Members.Add(new Member
             {
                 Name = new MemberName("Mark"),
-                Email = new MemberEmail("mark@gmail.com")
+                Email = new MemberEmail("mark@gmail.com"),
+                PasswordHash = "123456789"
             });
         });
 
@@ -49,13 +51,15 @@ public class GetMemberSummariesTests : IntegrationTest
             db.Members.Add(new Member
             {
                 Name = new MemberName("Riyad"),
-                Email = new MemberEmail("r@gmail.com")
+                Email = new MemberEmail("r@gmail.com"),
+                PasswordHash = "123456789"
             });
 
             db.Members.Add(new Member
             {
                 Name = new MemberName("Mark"),
-                Email = new MemberEmail("m@gmail.com")
+                Email = new MemberEmail("m@gmail.com"),
+                PasswordHash = "123456789"
             });
         });
 
@@ -75,13 +79,15 @@ public class GetMemberSummariesTests : IntegrationTest
             db.Members.Add(new Member
             {
                 Name = new MemberName("Riyad"),
-                Email = new MemberEmail("r@gmail.com")
+                Email = new MemberEmail("r@gmail.com"),
+                PasswordHash = "123456789"
             });
 
             db.Members.Add(new Member
             {
                 Name = new MemberName("Mark"),
-                Email = new MemberEmail("m@test.com")
+                Email = new MemberEmail("m@test.com"),
+                PasswordHash = "123456789"
             });
         });
 
@@ -100,19 +106,22 @@ public class GetMemberSummariesTests : IntegrationTest
             db.Members.Add(new Member
             {
                 Name = new MemberName("Riyad"),
-                Email = new MemberEmail("r@gmail.com")
+                Email = new MemberEmail("r@gmail.com"),
+                PasswordHash = "123456789"
             });
 
             db.Members.Add(new Member
             {
                 Name = new MemberName("Mark"),
-                Email = new MemberEmail("m@gmail.com")
+                Email = new MemberEmail("m@gmail.com"),
+                PasswordHash = "123456789"
             });
 
             db.Members.Add(new Member
             {
                 Name = new MemberName("riyad"),
-                Email = new MemberEmail("ri@gmail.com")
+                Email = new MemberEmail("ri@gmail.com"),
+                PasswordHash = "123456789"
             });
         });
 
@@ -134,13 +143,15 @@ public class GetMemberSummariesTests : IntegrationTest
             db.Members.Add(new Member
             {
                 Name = new MemberName("1% Riyad"),
-                Email = new MemberEmail("r@gmail.com")
+                Email = new MemberEmail("r@gmail.com"),
+                PasswordHash = "123456789"
             });
 
             db.Members.Add(new Member
             {
                 Name = new MemberName("Mark"),
-                Email = new MemberEmail("m@test.com")
+                Email = new MemberEmail("m@test.com"),
+                PasswordHash = "123456789"
             });
         });
 
@@ -160,13 +171,15 @@ public class GetMemberSummariesTests : IntegrationTest
             db.Members.Add(new Member
             {
                 Name = new MemberName("_ Riyad"),
-                Email = new MemberEmail("r@gmail.com")
+                Email = new MemberEmail("r@gmail.com"),
+                PasswordHash = "123456789"
             });
 
             db.Members.Add(new Member
             {
                 Name = new MemberName("Mark"),
-                Email = new MemberEmail("m@test.com")
+                Email = new MemberEmail("m@test.com"),
+                PasswordHash = "123456789"
             });
         });
 

@@ -6,10 +6,10 @@ public record MemberEmail
     public string Value { get; }
     public MemberEmail(string value)
     {
-        value = value.Trim();
-
         if (string.IsNullOrWhiteSpace(value))
             throw new DomainException("Email is required.");
+
+        value = value.Trim();
 
         if (value.Length > MaxLength)
             throw new DomainException($"Email cannot exceed {MaxLength} characters.");

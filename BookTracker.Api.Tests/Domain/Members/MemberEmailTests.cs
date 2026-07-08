@@ -27,10 +27,14 @@ public class MemberEmailTests
 
     [Fact]
     public void MemberEmailRejectsEmailLongerThan200Characters() =>
-        Assert.Throws<DomainException>(() => new MemberEmail(new string('x', 201)));
+    Assert.Throws<DomainException>(() => new MemberEmail(new string('x', 201)));
 
     [Fact]
     public void MemberEmailThrowsWhenMissingAt() =>
         Assert.Throws<DomainException>(() => new MemberEmail("r.m.s.gamil.com"));
+
+    [Fact]
+    public void MemberEmailRejectsNull() =>
+    Assert.Throws<DomainException>(() => new MemberEmail(null!));
 
 }

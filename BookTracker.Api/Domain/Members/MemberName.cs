@@ -6,10 +6,10 @@ public record MemberName
     public string Value { get; }
     public MemberName(string value)
     {
-        value = value.Trim();
-
         if (string.IsNullOrWhiteSpace(value))
             throw new DomainException("Member name is required.");
+
+        value = value.Trim();
 
         if (value.Length > MaxLength)
             throw new DomainException($"Member name cannot exceed {MaxLength} characters.");

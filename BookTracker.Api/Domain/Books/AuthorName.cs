@@ -6,10 +6,10 @@ public sealed record AuthorName
     public string Value { get; }
     public AuthorName(string value)
     {
-        string cleaned = value.Trim();
-
-        if (string.IsNullOrWhiteSpace(cleaned))
+        if (string.IsNullOrWhiteSpace(value))
             throw new DomainException("Author is required.");
+
+        string cleaned = value.Trim();
 
         if (cleaned.Length > MaxLength)
             throw new DomainException($"Author cannot be longer than {MaxLength} characters.");

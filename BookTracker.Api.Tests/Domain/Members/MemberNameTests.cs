@@ -27,6 +27,10 @@ public class MemberNameTests
 
     [Fact]
     public void MemberNameRejectsNameLongerThan100Characters() =>
-        Assert.Throws<DomainException>(() => new MemberName(new string('x', 101)));
+    Assert.Throws<DomainException>(() => new MemberName(new string('x', 101)));
+
+    [Fact]
+    public void MemberNameRejectsNull() =>
+    Assert.Throws<DomainException>(() => new MemberName(null!));
 
 }

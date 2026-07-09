@@ -20,7 +20,13 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             config.AddInMemoryCollection(
                 new Dictionary<string, string?>
                 {
-                    ["SeedDatabase"] = "false" // The database starts empty, and the test adds the data it needs...
+                    ["SeedDatabase"] = "false", // The database starts empty, and the test adds the data it needs...
+                    ["Jwt:Issuer"] = "BookTracker.Tests",
+                    ["Jwt:Audience"] = "BookTracker.Tests",
+                    // Signingkey ONLY for tests.... Never reuse a real/production key here.
+                    ["Jwt:SigningKey"] = "book-tracker-test-signing-key-with-32-characters",
+                    ["Jwt:ExpirationMinutes"] = "10"
+
                 });
         });
         builder.ConfigureServices(services =>

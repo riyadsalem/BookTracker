@@ -5,30 +5,41 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace BookTracker.Api.Tests.IntegrationTests;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
+    private static readonly KeyValuePair<string, string?>[]
+        TestSettings =
+        [
+            new("SeedDatabase", "false"),
+            new("Jwt:Issuer", "BookTracker.Tests"),
+            new("Jwt:Audience", "BookTracker.Tests"),
+            new(
+                "Jwt:SigningKey",
+                "book-tracker-test-signing-key-with-32-characters"),
+            new("Jwt:ExpirationMinutes", "10")
+        ];
+
     private SqliteConnection connection = null!;
     public EfReader GetReader() => new(Services);
     public EfWriter GetWriter() => new(Services);
+
+    protected override IHost CreateHost(
+        IHostBuilder builder)
+    {
+        builder.ConfigureHostConfiguration(
+            configuration =>
+                configuration.AddInMemoryCollection(
+                    TestSettings));
+
+        return base.CreateHost(builder);
+    }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureAppConfiguration((context, config) =>
-        {
-            config.AddInMemoryCollection(
-                new Dictionary<string, string?>
-                {
-                    ["SeedDatabase"] = "false", // The database starts empty, and the test adds the data it needs...
-                    ["Jwt:Issuer"] = "BookTracker.Tests",
-                    ["Jwt:Audience"] = "BookTracker.Tests",
-                    // Signingkey ONLY for tests.... Never reuse a real/production key here.
-                    ["Jwt:SigningKey"] = "book-tracker-test-signing-key-with-32-characters",
-                    ["Jwt:ExpirationMinutes"] = "10"
-
-                });
-        });
         builder.ConfigureServices(services =>
         {
             var descriptor = services.SingleOrDefault(service =>

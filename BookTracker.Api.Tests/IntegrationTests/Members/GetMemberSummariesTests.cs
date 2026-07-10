@@ -9,6 +9,8 @@ public class GetMemberSummariesTests : IntegrationTest
     [Fact]
     public async Task GetMemberSummariesReturnsMembers()
     {
+        await AuthenticateAsMember(MemberRole.Administrator);
+
         Writer.Seed(db =>
         {
             db.Members.Add(new Member
@@ -33,19 +35,21 @@ public class GetMemberSummariesTests : IntegrationTest
 
         Assert.NotNull(result);
 
-        Assert.Equal(2, result.TotalItems);
+        Assert.Equal(3, result.TotalItems);
         Assert.Equal(1, result.Page);
         Assert.Equal(10, result.PageSize);
 
-        Assert.Equal(2, result.Items.Count);
+        Assert.Equal(3, result.Items.Count);
 
-        Assert.Equal("Riyad", result.Items[0].Name);
-        Assert.Equal("Mark", result.Items[1].Name);
+        Assert.Equal("Riyad", result.Items[1].Name);
+        Assert.Equal("Mark", result.Items[2].Name);
     }
 
     [Fact]
     public async Task GetMemberSummariesCanSearchByName()
     {
+        await AuthenticateAsMember(MemberRole.Administrator);
+
         Writer.Seed(db =>
         {
             db.Members.Add(new Member
@@ -74,6 +78,8 @@ public class GetMemberSummariesTests : IntegrationTest
     [Fact]
     public async Task GetMemberSummariesCanSearchByEmail()
     {
+        await AuthenticateAsMember(MemberRole.Administrator);
+
         Writer.Seed(db =>
         {
             db.Members.Add(new Member
@@ -101,6 +107,8 @@ public class GetMemberSummariesTests : IntegrationTest
     [Fact]
     public async Task GetMemberSummariesApplyPagingAfterSearch()
     {
+        await AuthenticateAsMember(MemberRole.Administrator);
+
         Writer.Seed(db =>
         {
             db.Members.Add(new Member
@@ -138,6 +146,7 @@ public class GetMemberSummariesTests : IntegrationTest
     [Fact]
     public async Task SearchByPercentSignReturnsExactMatch()
     {
+        await AuthenticateAsMember(MemberRole.Administrator);
         Writer.Seed(db =>
         {
             db.Members.Add(new Member
@@ -166,6 +175,7 @@ public class GetMemberSummariesTests : IntegrationTest
     [Fact]
     public async Task SearchByUnderscoreReturnsExactMatch()
     {
+        await AuthenticateAsMember(MemberRole.Administrator);
         Writer.Seed(db =>
         {
             db.Members.Add(new Member

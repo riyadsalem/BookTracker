@@ -140,4 +140,24 @@ public class CreateMemberTests : IntegrationTest
 
     }
 
+    [Fact]
+    public async Task CreateMemberCreatesRegularMember()
+    {
+
+        CreateMemberRequest request = new()
+        {
+            Name = "Grace Hopper",
+            Email = "grace@example.com",
+            Password = "debugging-moth"
+        };
+
+        var response = await Client.PostAsJsonAsync("/members", request);
+        CreateMemberResponse created = await response.ReadJsonAs<CreateMemberResponse>(HttpStatusCode.Created);
+
+        Member? member = Reader.Query(db => db.Members.Find(created.Id));
+
+        Assert.NotNull(member);
+        Assert.Equal(MemberRole.Member, member.Role);
+    }
+
 }

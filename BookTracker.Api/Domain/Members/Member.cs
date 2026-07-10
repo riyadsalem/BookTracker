@@ -8,4 +8,5 @@ public class Member
 
     // No ValueObject for Password - it should be used once and....forgotten, not held around like Name / Email.
     public string PasswordHash { get; set; } = string.Empty;
+    public MemberRole Role { get; set; } = MemberRole.Member;
 }

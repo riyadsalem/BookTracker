@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using BookTracker.Api.Application;
 using BookTracker.Api.Domain.Members;
@@ -44,9 +45,8 @@ public static class WebApplicationBuilderExtensions
             ?? throw new InvalidOperationException("JWT settings are missing.");
 
         if (string.IsNullOrWhiteSpace(settings.SigningKey))
-        {
             throw new InvalidOperationException("JWT signing key is missing.");
-        }
+
 
         builder.Services.AddSingleton(settings);
         builder.Services.AddScoped<JwtTokenGenerator>();
@@ -70,13 +70,32 @@ public static class WebApplicationBuilderExtensions
                         IssuerSigningKey =
                             new SymmetricSecurityKey(
                                 Encoding.UTF8.GetBytes(settings.SigningKey)),
+
+                        // Tells ASP.NET Core WHICH claim inside the token
+                        // represents the role, for user.IsInRole(...)
+                        // and policy.RequireRole(...) to work correctly.
+                        NameClaimType = ClaimTypes.Name,
+                        RoleClaimType = ClaimTypes.Role,
+
                         ClockSkew = TimeSpan.Zero
                     };
             });
 
-        builder.Services.AddAuthorization();
-    }
+        builder.Services.AddAuthorization(options => // Authorization Plicies
+        {
+            options.AddPolicy(
+                AuthorizationPolicies.ManageBooks, // Naam voor policy
+                policy =>
+                    policy.RequireRole(
+                        nameof(MemberRole.Administrator))); // Any user who wants to go through this Policy must have the role of Administrator.
 
+            options.AddPolicy(
+                AuthorizationPolicies.ManageMembers,
+                policy =>
+                    policy.RequireRole(
+                        nameof(MemberRole.Administrator)));
+        });
+    }
 
     private static void RegisterHandlers(IServiceCollection services)
     {

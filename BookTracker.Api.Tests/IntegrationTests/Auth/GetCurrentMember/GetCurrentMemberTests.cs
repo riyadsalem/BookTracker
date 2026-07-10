@@ -12,14 +12,14 @@ public class GetCurrentMemberTests : IntegrationTest
 {
     private void SeedMember(string password = "analytical-engine")
     {
-        var member = new Member
+        Member member = new()
         {
             Name = new MemberName("Ada Lovelace"),
             Email = new MemberEmail("ada@example.com"),
             PasswordHash = string.Empty
         };
 
-        var passwordHasher = new PasswordHasher<Member>();
+        PasswordHasher<Member> passwordHasher = new();
         member.PasswordHash = passwordHasher.HashPassword(member, password);
 
         Writer.Seed(db => db.Members.Add(member));
@@ -37,7 +37,7 @@ public class GetCurrentMemberTests : IntegrationTest
     {
         SeedMember();
 
-        var loginRequest = new LoginRequest { Email = "ada@example.com", Password = "analytical-engine" };
+        LoginRequest loginRequest = new() { Email = "ada@example.com", Password = "analytical-engine" };
         var loginResponse = await Client.PostAsJsonAsync("/auth/login", loginRequest);
         var login = await loginResponse.ReadJsonAs<LoginResponse>(HttpStatusCode.OK);
 
@@ -45,7 +45,7 @@ public class GetCurrentMemberTests : IntegrationTest
             new AuthenticationHeaderValue("Bearer", login.AccessToken);
 
         var response = await Client.GetAsync("/auth/me");
-        var member = await response.ReadJsonAs<CurrentMemberResponse>(HttpStatusCode.OK);
+        CurrentMemberResponse member = await response.ReadJsonAs<CurrentMemberResponse>(HttpStatusCode.OK);
 
         Assert.Equal(1, member.Id);
         Assert.Equal("Ada Lovelace", member.Name);
@@ -60,5 +60,17 @@ public class GetCurrentMemberTests : IntegrationTest
 
         var response = await Client.GetAsync("/auth/me");
         await response.ShouldHaveStatusCode(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task GetCurrentMemberReturnsRole()
+    {
+        await AuthenticateAsMember(MemberRole.Administrator);
+
+        var response = await Client.GetAsync("/auth/me");
+
+        var member = await response.ReadJsonAs<CurrentMemberResponse>(HttpStatusCode.OK);
+
+        Assert.Equal("Administrator", member.Role);
     }
 }

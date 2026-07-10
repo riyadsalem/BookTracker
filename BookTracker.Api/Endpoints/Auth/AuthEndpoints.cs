@@ -33,12 +33,14 @@ public static class AuthEndpoints
         string id = user.FindFirst(ClaimTypes.NameIdentifier)!.Value;
         string name = user.FindFirst(ClaimTypes.Name)!.Value;
         string email = user.FindFirst(ClaimTypes.Email)!.Value;
+        string role = user.FindFirst(ClaimTypes.Role)!.Value;
 
         return Results.Ok(new CurrentMemberResponse
         {
             Id = int.Parse(id),
             Name = name,
-            Email = email
+            Email = email,
+            Role = role
         });
     }
 }

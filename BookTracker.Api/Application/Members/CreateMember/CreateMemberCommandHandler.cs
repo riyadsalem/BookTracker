@@ -26,7 +26,8 @@ public class CreateMemberCommandHandler(IMemberRepository memberRepository, IPas
         Member member = new()
         {
             Name = name,
-            Email = email
+            Email = email,
+            Role = MemberRole.Member // allen met createMember (((FIRST TIME)))
         };
 
         member.PasswordHash = passwordHasher.HashPassword(member, request.Password);

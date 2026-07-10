@@ -6,6 +6,8 @@ using BookTracker.Api.Application.Members.GetMemberDetails;
 using BookTracker.Api.Application.Members.GetMemberSummaries;
 using BookTracker.Api.Application.Members.UpdateMember;
 using BookTracker.Api.Domain;
+using BookTracker.Api.Domain.Members;
+using BookTracker.Api.Security;
 
 namespace BookTracker.Api.Endpoints.Members;
 
@@ -19,8 +21,8 @@ public static class MemberEndpoints
         no one else can do that.
         */
 
-        app.MapGet("/members", GetMemberSummaries);
-        app.MapGet("/members/{id:int}", GetMemberDetails);
+        app.MapGet("/members", GetMemberSummaries).RequireAuthorization(AuthorizationPolicies.ManageMembers);
+        app.MapGet("/members/{id:int}", GetMemberDetails).RequireAuthorization(AuthorizationPolicies.ManageMembers);
         app.MapPost("/members", CreateMember);
         app.MapPut("/members/{id:int}", UpdateMember).RequireAuthorization();
         app.MapDelete("/members/{id:int}", DeleteMember).RequireAuthorization();
@@ -28,10 +30,11 @@ public static class MemberEndpoints
         return app;
     }
 
-    private static bool IsCurrentMember(ClaimsPrincipal user, int memberId)
+    private static bool CanManageMember(ClaimsPrincipal user, int memberId)
     {
-        string? claim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (user.IsInRole(nameof(MemberRole.Administrator))) return true;
 
+        string? claim = user.FindFirstValue(ClaimTypes.NameIdentifier);
         // TryParse >> "10" -> 10
         return int.TryParse(claim, out var currentMemberId)
             && currentMemberId == memberId;
@@ -64,7 +67,7 @@ public static class MemberEndpoints
     }
     public static async Task<IResult> UpdateMember(int id, UpdateMemberRequest request, ClaimsPrincipal user, UpdateMemberCommandHandler handler)
     {
-        if (!IsCurrentMember(user, id)) return Results.Forbid();
+        if (!CanManageMember(user, id)) return Results.Forbid();
 
         try
         {
@@ -82,7 +85,7 @@ public static class MemberEndpoints
 
     public static async Task<IResult> DeleteMember(int id, ClaimsPrincipal user, DeleteMemberCommandHandler handler)
     {
-        if (!IsCurrentMember(user, id)) return Results.Forbid();
+        if (!CanManageMember(user, id)) return Results.Forbid();
         return await handler.Execute(id) ? Results.NoContent() : Results.NotFound();
     }
 

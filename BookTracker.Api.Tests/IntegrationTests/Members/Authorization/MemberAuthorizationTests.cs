@@ -122,4 +122,82 @@ public class MemberAuthorizationTests : IntegrationTest
         Member? member = Reader.Query(db => db.Members.Find(otherMemberId));
         Assert.NotNull(member);
     }
+
+    [Fact]
+    public async Task MemberListRequiresAuthentication()
+    {
+        var response = await Client.GetAsync("/members");
+        await response.ShouldHaveStatusCode(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task RegularMemberCannotViewMemberList()
+    {
+        await AuthenticateAsMember();
+        var response = await Client.GetAsync("/members");
+        await response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task AdministratorCanViewMemberList()
+    {
+        await AuthenticateAsMember(MemberRole.Administrator);
+        var response = await Client.GetAsync("/members");
+        await response.ShouldHaveStatusCode(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task RegularMemberCannotViewMemberDetails()
+    {
+        await AuthenticateAsMember();
+        int otherMemberId = SeedMember("Grace Hopper", "grace@example.com");
+        var response = await Client.GetAsync($"/members/{otherMemberId}");
+        await response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task AdministratorCanViewMemberDetails()
+    {
+        await AuthenticateAsMember(MemberRole.Administrator);
+        int otherMemberId = SeedMember("Grace Hopper", "grace@example.com");
+        var response = await Client.GetAsync($"/members/{otherMemberId}");
+        await response.ShouldHaveStatusCode(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task AdministratorCanUpdateAnotherMember()
+    {
+        int otherMemberId = SeedMember("III", "III@gmail.com");
+
+        await AuthenticateAsMember(MemberRole.Administrator);
+
+        UpdateMemberRequest request = new()
+        {
+            Name = "newIII",
+            Email = "newIII@gmail.com"
+        };
+
+        var response = await Client.PutAsJsonAsync($"/members/{otherMemberId}", request);
+
+        await response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
+
+        Member? member = Reader.Query(db => db.Members.Find(otherMemberId));
+        Assert.NotNull(member);
+        Assert.Equal("newIII", member.Name.Value);
+    }
+
+    [Fact]
+    public async Task AdministratorCanDeleteAnotherMember()
+    {
+        int otherMemberId = SeedMember("III", "III@gmail.com");
+
+        await AuthenticateAsMember(MemberRole.Administrator);
+
+        var response = await Client.DeleteAsync($"/members/{otherMemberId}");
+
+        await response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
+
+        Member? member = Reader.Query(db => db.Members.Find(otherMemberId));
+        Assert.Null(member);
+    }
 }

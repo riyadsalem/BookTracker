@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using BookTracker.Api.Application.Books.CreateBook;
 using BookTracker.Api.Domain.Books;
+using BookTracker.Api.Domain.Members;
 
 namespace BookTracker.Api.Tests.IntegrationTests.Books;
 
@@ -16,7 +17,7 @@ public class CreateBookTests : IntegrationTest
         Without this line, the request would be rejected with
         401 before ever reaching CreateBookCommandHandler.
         */
-        await AuthenticateAsMember();
+        await AuthenticateAsMember(MemberRole.Administrator);
 
         CreateBookRequest request = new CreateBookRequest
         {
@@ -48,7 +49,7 @@ public class CreateBookTests : IntegrationTest
     [Fact]
     public async Task PostBookReturnsBadRequestWhenTitleIsWhitespace() // TESTS VOOR OBECTVALUE
     {
-        await AuthenticateAsMember();
+        await AuthenticateAsMember(MemberRole.Administrator);
 
         CreateBookRequest request = new()
         {
@@ -65,7 +66,7 @@ public class CreateBookTests : IntegrationTest
     [Fact]
     public async Task PostBookReturnsBadRequestWhenYearIsTooLow()
     {
-        await AuthenticateAsMember();
+        await AuthenticateAsMember(MemberRole.Administrator);
 
         CreateBookRequest request = new()
         {
@@ -81,7 +82,7 @@ public class CreateBookTests : IntegrationTest
     [Fact]
     public async Task PostBookReturnsBadRequestWhenYearIsTooHigh()
     {
-        await AuthenticateAsMember();
+        await AuthenticateAsMember(MemberRole.Administrator);
 
         CreateBookRequest request = new()
         {

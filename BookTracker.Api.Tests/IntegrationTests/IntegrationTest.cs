@@ -19,13 +19,19 @@ public abstract class IntegrationTest : IDisposable
         Reader = factory.GetReader();
         Writer = factory.GetWriter();
     }
-    protected async Task<int> AuthenticateAsMember(string name = "Ada Lovelace", string email = "ada@example.com", string password = "analytical-engine")
+
+    protected async Task<int> AuthenticateAsMember(
+        MemberRole role = MemberRole.Member,
+        string name = "Ada Lovelace",
+        string email = "ada@example.com",
+        string password = "analytical-engine")
     {
         Member member = new()
         {
             Name = new MemberName(name),
             Email = new MemberEmail(email),
-            PasswordHash = string.Empty
+            PasswordHash = string.Empty,
+            Role = role
         };
 
         PasswordHasher<Member> passwordHasher = new();

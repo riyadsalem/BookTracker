@@ -186,4 +186,45 @@ Content-Type: application/json
 
 ### Current member (paste the accessToken from the login response above)
 GET http://localhost:5172/auth/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjMiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRhIExvdmVsYWNlIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoiYWRhQGV4YW1wbGUuY29tIiwiZXhwIjoxNzgzNTkyODg1LCJpc3MiOiJCb29rVHJhY2tlciIsImF1ZCI6IkJvb2tUcmFja2VyIn0.pnsy0kLWXFGfOD_zoyOpRVVbnOMsIaPx9kAbtvdBq4o
+Authorization: Bearer .....
+
+/////////////////////////////////////////////////////////////////////
+### Create member
+POST http://localhost:5172/members
+Content-Type: application/json
+
+{
+  "name": "Ada Lovelace",
+  "email": "riyadS@example.com",
+  "password": "analytical-engine"
+}
+
+### Login
+POST http://localhost:5172/auth/login
+Content-Type: application/json
+
+{
+  "email": "riyadS@example.com",
+  "password": "analytical-engine"
+}
+
+### Create book without token
+POST http://localhost:5172/books
+Content-Type: application/json
+
+{
+  "title": "Dune",
+  "author": "Frank Herbert",
+  "year": 1965
+}
+
+### Create book with token
+POST http://localhost:5172/books
+Content-Type: application/json
+Authorization: Bearer -----
+
+{
+  "title": "Dune",
+  "author": "Frank Herbert",
+  "year": 1965
+}

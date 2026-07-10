@@ -11,6 +11,13 @@ public class CreateBookTests : IntegrationTest
     [Fact]
     public async Task PostBookCreatesBook()
     {
+        /*
+        Creating a book now requires an authenticated member.
+        Without this line, the request would be rejected with
+        401 before ever reaching CreateBookCommandHandler.
+        */
+        await AuthenticateAsMember();
+
         CreateBookRequest request = new CreateBookRequest
         {
             Title = "The Heart Is a Lonely Hunter",
@@ -41,6 +48,8 @@ public class CreateBookTests : IntegrationTest
     [Fact]
     public async Task PostBookReturnsBadRequestWhenTitleIsWhitespace() // TESTS VOOR OBECTVALUE
     {
+        await AuthenticateAsMember();
+
         CreateBookRequest request = new()
         {
             Title = "   ",
@@ -56,6 +65,8 @@ public class CreateBookTests : IntegrationTest
     [Fact]
     public async Task PostBookReturnsBadRequestWhenYearIsTooLow()
     {
+        await AuthenticateAsMember();
+
         CreateBookRequest request = new()
         {
             Title = "Leven",
@@ -70,6 +81,8 @@ public class CreateBookTests : IntegrationTest
     [Fact]
     public async Task PostBookReturnsBadRequestWhenYearIsTooHigh()
     {
+        await AuthenticateAsMember();
+
         CreateBookRequest request = new()
         {
             Title = "Toekomst",

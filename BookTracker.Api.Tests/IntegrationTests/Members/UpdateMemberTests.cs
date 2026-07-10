@@ -10,16 +10,7 @@ public class UpdateMemberTests : IntegrationTest
     [Fact]
     public async Task PutMemberUpdatesMember()
     {
-        Writer.Seed(db =>
-        {
-            db.Members.Add(
-                new Member
-                {
-                    Name = new MemberName("Riyad"),
-                    Email = new MemberEmail("r@gmail.com"),
-                    PasswordHash = "123456789"
-                });
-        });
+        int memberId = await AuthenticateAsMember();
 
         UpdateMemberRequest request = new()
         {
@@ -27,45 +18,39 @@ public class UpdateMemberTests : IntegrationTest
             Email = "mark@gmail.com"
         };
 
-        var response = await Client.PutAsJsonAsync("/members/1", request);
+        var response = await Client.PutAsJsonAsync($"/members/{memberId}", request);
 
         await response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
-        Member? member = Reader.Query(db => db.Members.Find(1));
+        Member? member = Reader.Query(db => db.Members.Find(memberId));
 
         Assert.NotNull(member);
         Assert.Equal("Mark", member.Name.Value);
         Assert.Equal("mark@gmail.com", member.Email.Value);
-        Assert.Equal("123456789", member.PasswordHash);
-
     }
 
     [Fact]
     public async Task PutMemberReturnsNotFoundWhenMemberDoesNotExist()
     {
+        int memberId = await AuthenticateAsMember();
+
+        Writer.Seed(db => db.Members.Remove(db.Members.Find(memberId)!));
+
+
         UpdateMemberRequest request = new()
         {
             Name = "Riyad",
             Email = "riyad@gmail.com"
         };
 
-        var response = await Client.PutAsJsonAsync("/members/9999", request);
+        var response = await Client.PutAsJsonAsync($"/members/{memberId}", request);
         await response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
     }
 
     [Fact]
     public async Task PutMemberReturnsBadRequestWhenNameIsWhitespace()
     {
-        Writer.Seed(db =>
-        {
-            db.Members.Add(
-                new Member
-                {
-                    Name = new MemberName("Riyad"),
-                    Email = new MemberEmail("r@gmail.com"),
-                    PasswordHash = "123456789"
-                });
-        });
+        int memberId = await AuthenticateAsMember();
 
         UpdateMemberRequest request = new()
         {
@@ -73,23 +58,15 @@ public class UpdateMemberTests : IntegrationTest
             Email = "r@gmail.com"
         };
 
-        var response = await Client.PutAsJsonAsync("/members/1", request);
+        var response = await Client.PutAsJsonAsync($"/members/{memberId}", request);
         await response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
     }
 
     [Fact]
     public async Task PutMemberReturnsBadRequestWhenEmailIsWhitespace()
     {
-        Writer.Seed(db =>
-        {
-            db.Members.Add(
-                new Member
-                {
-                    Name = new MemberName("Riyad"),
-                    Email = new MemberEmail("r@gmail.com"),
-                    PasswordHash = "123456789"
-                });
-        });
+
+        int memberId = await AuthenticateAsMember();
 
         UpdateMemberRequest request = new()
         {
@@ -97,23 +74,14 @@ public class UpdateMemberTests : IntegrationTest
             Email = "   "
         };
 
-        var response = await Client.PutAsJsonAsync("/members/1", request);
+        var response = await Client.PutAsJsonAsync($"/members/{memberId}", request);
         await response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
     }
 
     [Fact]
     public async Task PutMemberReturnsBadRequestWhenEmailHasNoAtSign()
     {
-        Writer.Seed(db =>
-        {
-            db.Members.Add(
-                new Member
-                {
-                    Name = new MemberName("riyad"),
-                    Email = new MemberEmail("r@gmail.com"),
-                    PasswordHash = "123456789"
-                });
-        });
+        int memberId = await AuthenticateAsMember();
 
         UpdateMemberRequest request = new()
         {
@@ -121,56 +89,41 @@ public class UpdateMemberTests : IntegrationTest
             Email = "rgmail.com"
         };
 
-        var response = await Client.PutAsJsonAsync("/members/1", request);
+        var response = await Client.PutAsJsonAsync($"/members/{memberId}", request);
         await response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
     }
 
     [Fact]
     public async Task PutMemberReturnsConflictWhenEmailBelongsToAnotherMember()
     {
+
+        int memberId = await AuthenticateAsMember();
+
         Writer.Seed(db =>
         {
             db.Members.Add(
                 new Member
                 {
-                    Name = new MemberName("riyad"),
-                    Email = new MemberEmail("r@gmail.com"),
-                    PasswordHash = "123456789"
+                    Name = new MemberName("Mark"),
+                    Email = new MemberEmail("mark@example.com"),
+                    PasswordHash = "test-password-hash"
                 });
-
-            db.Members.Add(
-                new Member
-                {
-                    Name = new MemberName("mark"),
-                    Email = new MemberEmail("m@gmail.com"),
-                    PasswordHash = "123456789"
-                });
-
         });
 
         UpdateMemberRequest request = new()
         {
-            Name = "mark",
-            Email = "m@gmail.com"
+            Name = "Riyad",
+            Email = "mark@example.com"
         };
 
-        var response = await Client.PutAsJsonAsync("/members/1", request);
+        var response = await Client.PutAsJsonAsync($"/members/{memberId}", request);
         await response.ShouldHaveStatusCode(HttpStatusCode.Conflict);
     }
 
     [Fact]
     public async Task PutMemberAllowsKeepingOwnEmail()
     {
-        Writer.Seed(db =>
-        {
-            db.Members.Add(
-                new Member
-                {
-                    Name = new MemberName("Riyad"),
-                    Email = new MemberEmail("riyad.m.salem.19988@gmail.com"),
-                    PasswordHash = "123456789"
-                });
-        });
+        int memberId = await AuthenticateAsMember();
 
         UpdateMemberRequest request = new()
         {
@@ -178,7 +131,7 @@ public class UpdateMemberTests : IntegrationTest
             Email = "riyad.m.salem.19988@gmail.com"
         };
 
-        var response = await Client.PutAsJsonAsync("/members/1", request);
+        var response = await Client.PutAsJsonAsync($"/members/{memberId}", request);
         await response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
     }
 

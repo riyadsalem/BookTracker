@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using BookTracker.Api.Application.Members;
 using BookTracker.Api.Application.Members.CreateMember;
 using BookTracker.Api.Application.Members.DeleteMember;
@@ -12,15 +13,29 @@ public static class MemberEndpoints
 {
     public static IEndpointRouteBuilder MapMemberEndpoints(this IEndpointRouteBuilder app)
     {
+        /*
+        Anyone can edit and delete any book,
+        but only the person edits and deletes themselves....
+        no one else can do that.
+        */
+
         app.MapGet("/members", GetMemberSummaries);
         app.MapGet("/members/{id:int}", GetMemberDetails);
         app.MapPost("/members", CreateMember);
-        app.MapPut("/members/{id:int}", UpdateMember);
-        app.MapDelete("/members/{id:int}", DeleteMember);
+        app.MapPut("/members/{id:int}", UpdateMember).RequireAuthorization();
+        app.MapDelete("/members/{id:int}", DeleteMember).RequireAuthorization();
 
         return app;
     }
 
+    private static bool IsCurrentMember(ClaimsPrincipal user, int memberId)
+    {
+        string? claim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        // TryParse >> "10" -> 10
+        return int.TryParse(claim, out var currentMemberId)
+            && currentMemberId == memberId;
+    }
     public static async Task<IResult> GetMemberSummaries([AsParameters] GetMemberSummariesRequest request, GetMemberSummariesQueryHandler handler) =>
      Results.Ok(await handler.Execute(request));
 
@@ -47,8 +62,10 @@ public static class MemberEndpoints
             return Results.BadRequest(new { error = exception.Message });
         }
     }
-    public static async Task<IResult> UpdateMember(int id, UpdateMemberRequest request, UpdateMemberCommandHandler handler)
+    public static async Task<IResult> UpdateMember(int id, UpdateMemberRequest request, ClaimsPrincipal user, UpdateMemberCommandHandler handler)
     {
+        if (!IsCurrentMember(user, id)) return Results.Forbid();
+
         try
         {
             return await handler.Execute(id, request) ? Results.NoContent() : Results.NotFound();
@@ -63,7 +80,10 @@ public static class MemberEndpoints
         }
     }
 
-    public static async Task<IResult> DeleteMember(int id, DeleteMemberCommandHandler handler) =>
-    await handler.Execute(id) ? Results.NoContent() : Results.NotFound();
+    public static async Task<IResult> DeleteMember(int id, ClaimsPrincipal user, DeleteMemberCommandHandler handler)
+    {
+        if (!IsCurrentMember(user, id)) return Results.Forbid();
+        return await handler.Execute(id) ? Results.NoContent() : Results.NotFound();
+    }
 
 }

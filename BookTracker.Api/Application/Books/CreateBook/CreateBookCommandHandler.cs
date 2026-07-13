@@ -1,3 +1,4 @@
+using BookTracker.Api.Domain.Actors;
 using BookTracker.Api.Domain.Books;
 using BookTracker.Api.Storage.Books;
 
@@ -5,8 +6,10 @@ namespace BookTracker.Api.Application.Books.CreateBook;
 
 public class CreateBookCommandHandler(IBookRepository bookRepository) : IHandler
 {
-    public async Task<CreateBookResponse> Execute(CreateBookRequest request)
+    public async Task<CreateBookResponse> Execute(Actor actor, CreateBookRequest request)
     {
+        BookPermissions.EnsureCanManage(actor);
+
         Book book = new()
         {
             Title = new BookTitle(request.Title),
@@ -25,4 +28,3 @@ public class CreateBookCommandHandler(IBookRepository bookRepository) : IHandler
         };
     }
 }
-

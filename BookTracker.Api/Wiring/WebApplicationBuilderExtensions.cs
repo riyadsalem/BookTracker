@@ -80,21 +80,7 @@ public static class WebApplicationBuilderExtensions
                         ClockSkew = TimeSpan.Zero
                     };
             });
-
-        builder.Services.AddAuthorization(options => // Authorization Plicies
-        {
-            options.AddPolicy(
-                AuthorizationPolicies.ManageBooks, // Naam voor policy
-                policy =>
-                    policy.RequireRole(
-                        nameof(MemberRole.Administrator))); // Any user who wants to go through this Policy must have the role of Administrator.
-
-            options.AddPolicy(
-                AuthorizationPolicies.ManageMembers,
-                policy =>
-                    policy.RequireRole(
-                        nameof(MemberRole.Administrator)));
-        });
+        builder.Services.AddAuthorization(); // Zonder POLICIES ((Authorization in DOMAIN (NIET IN ENDDPOINTS)))
     }
 
     private static void RegisterHandlers(IServiceCollection services)

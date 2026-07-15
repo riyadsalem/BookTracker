@@ -10,6 +10,7 @@ public class EfMemberRepository(AppDbContext dbContext) : IMemberRepository
         dbContext.Members.Add(member);
         await dbContext.SaveChangesAsync();
         return member;
+
     }
 
     public async Task<bool> DeleteAsync(int id)

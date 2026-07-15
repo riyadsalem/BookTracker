@@ -26,6 +26,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
             book.Property(b => b.Year)
             .HasConversion(year => year.Value, value => new PublicationYear(value));
+
+            book.Property(b => b.Version).IsConcurrencyToken();
+            // Optimistic Concurrency Control
+            // Throw (DbUpdateConcurrencyException)
+            // IsConcurrencyToken >> In SQL (AND Version = 1111)
         });
 
         // Member Table

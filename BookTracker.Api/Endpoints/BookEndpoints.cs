@@ -6,6 +6,7 @@ using BookTracker.Api.Application.Books.GetBookSummaries;
 using BookTracker.Api.Application.Books.UpdateBook;
 using BookTracker.Api.Domain;
 using BookTracker.Api.Domain.Actors;
+using BookTracker.Api.Storage.Books;
 
 namespace BookTracker.Api.Endpoints;
 
@@ -22,10 +23,6 @@ public static class BookEndpoints
         return app;
     }
 
-    /*
-     request.page & request.pageSize
-     GET /book?page=1&pageSize=10 >>>> [AsParameters] > ASP.NET lees page,pagesize van LINK
-     */
     public static async Task<IResult> GetBookSummaries([AsParameters] GetBookSummariesRequest request, GetBookSummariesQueryHandler query)
     => Results.Ok(await query.Execute(request));
 
@@ -39,7 +36,7 @@ public static class BookEndpoints
     {
         try
         {
-            Actor actor = principal.ToActor();
+            var actor = principal.ToActor();
 
             CreateBookResponse response = await handler.Execute(actor, request);
             return Results.Created($"/books/{response.Id}", response);
@@ -59,7 +56,16 @@ public static class BookEndpoints
         {
             Actor actor = principal.ToActor();
 
-            return await handler.Execute(actor, id, request) ? Results.NoContent() : Results.NotFound();
+            UpdateBookResult result = await handler.Execute(actor, id, request);
+
+            return result switch
+            {
+                UpdateBookResult.Updated => Results.NoContent(),
+                UpdateBookResult.NotFound => Results.NotFound(),
+                UpdateBookResult.Conflict => Results.Conflict(
+                    new { error = "The book was changed by another user." }),
+                _ => throw new ArgumentOutOfRangeException()
+            };
         }
         catch (ForbiddenOperationException)
         {

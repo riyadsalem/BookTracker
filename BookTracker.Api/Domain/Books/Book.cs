@@ -6,4 +6,6 @@ public class Book
     public required BookTitle Title { get; set; }
     public required AuthorName Author { get; set; }
     public required PublicationYear Year { get; set; }
+    public Guid Version { get; set; } = Guid.NewGuid();
+
 }

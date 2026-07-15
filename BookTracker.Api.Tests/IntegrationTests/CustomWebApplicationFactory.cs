@@ -11,6 +11,10 @@ namespace BookTracker.Api.Tests.IntegrationTests;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
+    private SqliteConnection? connection;
+    public EfReader GetReader() => new(Services);
+    public EfWriter GetWriter() => new(Services);
+
     private static readonly KeyValuePair<string, string?>[]
         TestSettings =
         [
@@ -23,17 +27,22 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             new("Jwt:ExpirationMinutes", "10")
         ];
 
+    /*
     private SqliteConnection connection = null!;
-    public EfReader GetReader() => new(Services);
-    public EfWriter GetWriter() => new(Services);
+    /*
+    After the tests finish, we must clean up the SqliteConnection by calling Dispose().
+    Dispose(bool disposing) has two cases: disposing = true means Dispose() was called directly,
+    so it is safe to clean managed resources like SqliteConnection.
+    disposing = false means the Garbage Collector is cleaning the object through the finalizer,
+    so managed resources may already be gone. Therefore,
+    we make the connection nullable (SqliteConnection?) and use connection?.Dispose() to avoid a NullReferenceException.
+    */
 
-    protected override IHost CreateHost(
-        IHostBuilder builder)
+    protected override IHost CreateHost(IHostBuilder builder)
     {
         builder.ConfigureHostConfiguration(
             configuration =>
-                configuration.AddInMemoryCollection(
-                    TestSettings));
+                configuration.AddInMemoryCollection(TestSettings));
 
         return base.CreateHost(builder);
     }
@@ -64,8 +73,9 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     }
     protected override void Dispose(bool disposing)
     {
+        if (disposing) connection?.Dispose();
+
         base.Dispose(disposing);
-        connection.Dispose();
     }
 
 }

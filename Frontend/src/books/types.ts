@@ -31,3 +31,10 @@ export type CreateBookResponse = {
   year: number;
   // met zonder (version data) NA (created) >> ga naar detailes page and zie de version data
 };
+
+export type UpdateBookRequest = {
+  title: string;
+  author: string;
+  year: number;
+  version: string; // lees van BookDetails
+};

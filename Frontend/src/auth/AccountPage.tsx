@@ -1,30 +1,10 @@
-import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Navigate } from "react-router-dom";
 import { ApiError } from "../api";
-import { getCurrentMember } from "./authApi";
-import { getAccessToken, removeAccessToken } from "./tokenStorage";
+import { getAccessToken } from "./tokenStorage";
+import { useCurrentMember } from "./useCurrentMember";
 
 export function AccountPage() {
-  const currentMemberQuery = useQuery({
-    // lees (GET)
-    queryKey: ["current-member"], // zet de data in deze key
-    queryFn: getCurrentMember,
-    enabled: getAccessToken() !== null,
-    retry: false, // als ik niet (retry) zet, en api back (401 Unauthorized) DUS >> react query gaat call (getCurrentMember) function again..
-  });
-
-  // currentMemberQuery.error instanceof ApiError >> result is true of false
-  const unauthorized =
-    currentMemberQuery.error instanceof ApiError &&
-    currentMemberQuery.error.status === 401;
-
-  // This effect removes the saved access token when the API returns 401 Unauthorized. This forces the user to log in again with a valid token.
-  useEffect(() => {
-    if (unauthorized) {
-      removeAccessToken();
-    }
-  }, [unauthorized]);
+  const currentMemberQuery = useCurrentMember();
 
   if (!getAccessToken()) {
     return <Navigate to="/login" replace />;
@@ -33,6 +13,10 @@ export function AccountPage() {
   if (currentMemberQuery.isPending) {
     return <p>Loading account...</p>;
   }
+
+  const unauthorized =
+    currentMemberQuery.error instanceof ApiError &&
+    currentMemberQuery.error.status === 401;
 
   if (unauthorized) {
     return <Navigate to="/login" replace />;

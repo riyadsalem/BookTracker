@@ -292,5 +292,33 @@ public class BookListTests : IntegrationTest
         Assert.Equal(1, result.TotalItems);
     }
 
+    [Fact]
+    public async Task SearchByStringTerminatorReturnsExactMatch()
+    {
+        Writer.Seed(db =>
+        {
+            db.Books.AddRange(
+                new Book
+                {
+                    Title = new BookTitle("LessThan\0"),
+                    Author = new AuthorName("Riyad"),
+                    Year = new PublicationYear(2026)
+                },
+                new Book
+                {
+                    Title = new BookTitle("THINDINGTEST"),
+                    Author = new AuthorName("Mark"),
+                    Year = new PublicationYear(2006)
+                });
+        });
+
+        var response = await Client.GetAsync("/books?search=\0");
+        PagedResult<BookSummary> result = await response.ReadJsonAs<PagedResult<BookSummary>>(HttpStatusCode.OK);
+
+        BookSummary book = Assert.Single(result.Items);
+        Assert.Equal("_OORLOG", book.Title);
+        Assert.Equal(1, result.TotalItems);
+    }
+
 }
 

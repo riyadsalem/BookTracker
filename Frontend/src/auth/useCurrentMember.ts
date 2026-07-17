@@ -2,13 +2,18 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ApiError } from "../api";
 import { getCurrentMember } from "./authApi";
-import { getAccessToken, removeAccessToken } from "./tokenStorage";
+import { removeAccessToken, useAccessToken } from "./tokenStorage";
 
 export function useCurrentMember() {
+  // useAccessToken keeps this hook in sync with the current access token.
+  // If the user logs in, logs out, or the token is removed,
+  // React automatically re-renders and updates the query.
+  const accessToken = useAccessToken();
+
   const query = useQuery({
     queryKey: ["current-member"], // zet de data in deze key
     queryFn: getCurrentMember,
-    enabled: getAccessToken() !== null,
+    enabled: accessToken !== null,
     retry: false, // als ik niet (retry) zet, en api back (401 Unauthorized) DUS >> react query gaat call (getCurrentMember) function again..
   });
 

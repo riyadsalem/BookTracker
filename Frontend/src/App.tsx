@@ -1,12 +1,13 @@
-import { Link, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { AccountPage } from "./auth/AccountPage";
 import { LoginPage } from "./auth/LoginPage";
-import { LogoutButton } from "./auth/LogoutButton";
 import { RequireAdministrator } from "./auth/RequireAdministrator";
 import { BookListPage } from "./books/BookListPage";
 import { BookDetailsPage } from "./books/BookDetailsPage";
 import { CreateBookPage } from "./books/CreateBookPage";
 import { EditBookPage } from "./books/EditBookPage";
+import { RegisterPage } from "./members/RegisterPage";
+import { Navigation } from "./Navigation";
 
 function HomePage() {
   return <h1>Book Tracker</h1>;
@@ -15,13 +16,7 @@ function HomePage() {
 export default function App() {
   return (
     <>
-      <nav>
-        <Link to="/">Home</Link>
-        <Link to="/books">Books</Link>
-        <Link to="/login">Log in</Link>
-        <Link to="/account">Account</Link>
-        <LogoutButton />
-      </nav>
+      <Navigation />
 
       <Routes>
         <Route path="/" element={<HomePage />} />
@@ -33,6 +28,7 @@ export default function App() {
         </Route>
 
         <Route path="/books/:bookId" element={<BookDetailsPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/account" element={<AccountPage />} />
       </Routes>

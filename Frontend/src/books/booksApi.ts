@@ -50,3 +50,9 @@ export function updateBook(bookId: number, request: UpdateBookRequest) {
     body: JSON.stringify(request),
   });
 }
+
+export function deleteBook(bookId: number) {
+  return apiRequestWithoutResponse(`/books/${bookId}`, {
+    method: "DELETE",
+  });
+}

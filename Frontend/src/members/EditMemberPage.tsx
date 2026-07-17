@@ -9,7 +9,7 @@ function readMemberId(value: string | undefined) {
   const memberId = Number(value);
   return Number.isInteger(memberId) && memberId > 0 ? memberId : null;
 }
-
+//////// this page vooooooor ADMIN..... (MemberId...)
 export function EditMemberPage() {
   const { memberId: memberIdParameter } = useParams();
   const memberId = readMemberId(memberIdParameter);
@@ -40,6 +40,9 @@ export function EditMemberPage() {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["members"] });
+      // quryClient.invalidateQueries ==>> Update -> Delete cache -> GET/members
+      // ==> Forget this data and go back to the server. (MAAK GET /members)
+
       navigate(`/members/${memberId}`);
     },
   });

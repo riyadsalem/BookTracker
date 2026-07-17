@@ -28,7 +28,7 @@ export type GetMembersRequest = {
   search: string;
 };
 
-// EN: Only name and email - no version, password, or role.
+// Only name and email - no version, password, or role.
 export type UpdateMemberRequest = {
   name: string;
   email: string;

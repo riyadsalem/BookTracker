@@ -1,7 +1,8 @@
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { ApiError } from "../api";
 import { getAccessToken } from "./tokenStorage";
 import { useCurrentMember } from "./useCurrentMember";
+import { DeleteAccountButton } from "./DeleteAccountButton";
 
 export function AccountPage() {
   const currentMemberQuery = useCurrentMember();
@@ -33,6 +34,8 @@ export function AccountPage() {
       <h1>{member.name}</h1>
       <p>{member.email}</p>
       <p>Role: {member.role}</p>
+      <Link to="/account/edit">Edit account</Link>
+      <DeleteAccountButton memberId={member.id} label={member.email} />
     </main>
   );
 }

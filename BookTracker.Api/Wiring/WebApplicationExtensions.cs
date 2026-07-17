@@ -5,7 +5,7 @@ using BookTracker.Api.Endpoints.Members;
 using BookTracker.Api.Seeding;
 using BookTracker.Api.Storage;
 using Microsoft.AspNetCore.Identity;
-
+using Microsoft.EntityFrameworkCore;
 
 namespace BookTracker.Api.Wiring;
 
@@ -19,9 +19,16 @@ public static class WebApplicationExtensions
             using var scope = app.Services.CreateScope();
 
             var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-            dbContext.Database.EnsureCreated(); // Create DB
             var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<Member>>();
+
+            /*
+            EnsureCreated() → Creates the database once. No schema updates.
+            Migrations → Track database schema changes over time.
+            Migrate() → Applies only pending migrations and keeps existing data intact.
+            */
+            // dbContext.Database.EnsureCreated(); // Create DB
+            dbContext.Database.Migrate(); // Apply pending migrations.....
+
 
 
             if (app.Configuration.GetValue<bool>("SeedDatabase"))

@@ -49,6 +49,14 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        /*
+        Run the application in the Testing environment so the
+        Development startup doesn't execute Database.Migrate().
+        Tests create the in-memory database using EnsureCreated().
+        */
+
+        builder.UseEnvironment("Testing");
+
         builder.ConfigureServices(services =>
         {
             var descriptor = services.SingleOrDefault(service =>
@@ -68,7 +76,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            db.Database.EnsureCreated();
+            db.Database.EnsureCreated(); ////// gebruik daaaaaaaaaaaaaaaaaaaaaaaaaaat now (niet migrate)
         });
     }
     protected override void Dispose(bool disposing)

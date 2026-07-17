@@ -9,3 +9,27 @@ export type RegisterMemberResponse = {
   name: string;
   email: string;
 };
+
+export type MemberSummary = {
+  id: number;
+  name: string;
+  email: string;
+};
+
+export type MemberDetails = {
+  id: number;
+  name: string;
+  email: string;
+};
+
+export type GetMembersRequest = {
+  page: number;
+  pageSize: number;
+  search: string;
+};
+
+// EN: Only name and email - no version, password, or role.
+export type UpdateMemberRequest = {
+  name: string;
+  email: string;
+};

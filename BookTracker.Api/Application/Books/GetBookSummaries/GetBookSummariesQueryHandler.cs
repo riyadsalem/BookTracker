@@ -1,6 +1,8 @@
 using BookTracker.Api.Application.GetBookSummaries;
 using BookTracker.Api.Storage;
 using Microsoft.EntityFrameworkCore;
+using BookTracker.Api.Domain.Books;
+
 namespace BookTracker.Api.Application.Books.GetBookSummaries;
 
 public class GetBookSummariesQueryHandler(AppDbContext dbContext) : IHandler
@@ -25,29 +27,34 @@ public class GetBookSummariesQueryHandler(AppDbContext dbContext) : IHandler
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             /*
-            (% _) are special characters in SQL LIKE.
-            % > (any text (even empty))
-            _ > any single character
-            If the user types % as their search word, without fixing this, SQL would read it as (Match anything) 
-            instead of (find rows that contain a % character)
+            If the search term contains a NUL character ('\0') ((SQLite(C taal))), SQLite LIKE does not work correctly.
+            Daarom we load all books into memory and use .NET's string.Contains() to find the matching books.
+            Daarna we collect the IDs and continue the query with these IDs. Zo paging and counting still work correctly...
+            And also the SearchByStringTerminatorReturnsExactMatch test passes.
             */
+            if (request.Search.Contains('\0')) // search contains (\0 >> NULL value) DUS gebruik niet SQL
+            {
+                string term = request.Search.Trim();
+                List<Book> allBooks = await dbContext.Books.AsNoTracking().ToListAsync(); // GET ALL BOOKS
+                List<int> matchingIds = allBooks
+                    .Where(b => // Deza C# .. Niet SQLite LIKE
+                    // Because a String in .NET is not a C String.... In .NET alle String bewaart its actual LENGTH (het stopt niet in \0)
+                        b.Title.Value.Contains(term) || b.Author.Value.Contains(term))
+                    .Select(b => b.Id)
+                    .ToList();
+                query = query.Where(b => matchingIds.Contains(b.Id));
+                // This means going back to EF Core again... But NOW... not by LIKK... BUT by WHERE Id IN (4,9,11)
+            }
+            else
+            {
+                String searchResult = request.Search.Trim().Replace("%", "\\%").Replace("_", "\\_");
+                String search = $"%{searchResult}%";
 
-            // 100%_C# >> 100\%\_C#
-            // Escape '%' and '_' so SQL searches for them as text,
-            // not as LIKE wildcard characters.
-            String searchResult = request.Search.Trim().Replace("%", "\\%").Replace("_", "\\_");
-
-
-            // SQL (LIKE '%dune%') >>> It is looking for any text that contains the word dune.
-            String search = $"%{searchResult}%";
-
-            query = query.Where(book =>
-                // (string)book.Title (DDD) >>>> book.Title.Value
-                // Tell SQL that '\' is the escape character, so '%' and '_' are treated as normal characters.
-                EF.Functions.Like((string)book.Title, search, "\\") || // Like("Dune Messiah", "%dune%")
-                EF.Functions.Like((string)book.Author, search, "\\"));
+                query = query.Where(book =>
+                    EF.Functions.Like((string)book.Title, search, "\\") ||
+                    EF.Functions.Like((string)book.Author, search, "\\"));
+            }
         }
-
         int totalItems = await query.CountAsync(); // EF Core 
 
         List<BookSummary> books = await query.AsNoTracking() // Allen lezen

@@ -201,4 +201,34 @@ public class GetMemberSummariesTests : IntegrationTest
         Assert.Equal(1, result.TotalItems);
     }
 
+    [Fact]
+    public async Task SearchByStringTerminatorReturnsExactMatch()
+    {
+        await AuthenticateAsMember(MemberRole.Administrator);
+
+        Writer.Seed(db =>
+        {
+            db.Members.AddRange(
+                new Member
+                {
+                    Name = new MemberName("LessThan\0"),
+                    Email = new MemberEmail("riyad@gmail.com"),
+                    PasswordHash = "test-password-hash"
+                },
+                new Member
+                {
+                    Name = new MemberName("THINKINGTEST"),
+                    Email = new MemberEmail("mark@gmail.com"),
+                    PasswordHash = "test-password-hash"
+                });
+        });
+
+        var response = await Client.GetAsync("/members?search=\0");
+        GetMemberSummariesResponse result = await response.ReadJsonAs<GetMemberSummariesResponse>(HttpStatusCode.OK);
+
+        MemberSummary member = Assert.Single(result.Items);
+        Assert.Equal("LessThan\0", member.Name);
+        Assert.Equal(1, result.TotalItems);
+    }
+
 }

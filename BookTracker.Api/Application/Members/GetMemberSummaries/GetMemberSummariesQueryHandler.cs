@@ -22,14 +22,26 @@ public class GetMemberSummariesQueryHandler(AppDbContext dbContext) : IHandler
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
-            String searchResult = request.Search.Trim().Replace("%", "\\%").Replace("_", "\\_");
-            String search = $"%{searchResult}%";
+            if (request.Search.Contains('\0'))
+            {
+                string term = request.Search.Trim();
+                List<Member> allMembers = await dbContext.Members.AsNoTracking().ToListAsync();
+                List<int> matchingIds = allMembers
+                    .Where(m => m.Name.Value.Contains(term) || m.Email.Value.Contains(term))
+                    .Select(m => m.Id)
+                    .ToList();
+                query = query.Where(m => matchingIds.Contains(m.Id));
+            }
+            else
+            {
+                String searchResult = request.Search.Trim().Replace("%", "\\%").Replace("_", "\\_");
+                String search = $"%{searchResult}%";
 
-            query = query.Where(member =>
-                EF.Functions.Like((string)member.Name, search, "\\") ||
-                EF.Functions.Like((string)member.Email, search, "\\"));
+                query = query.Where(member =>
+                    EF.Functions.Like((string)member.Name, search, "\\") ||
+                    EF.Functions.Like((string)member.Email, search, "\\"));
+            }
         }
-
         int totalItems = await query.CountAsync();
 
         var members = await query

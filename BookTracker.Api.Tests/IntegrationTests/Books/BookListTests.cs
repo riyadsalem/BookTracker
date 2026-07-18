@@ -301,12 +301,17 @@ public class BookListTests : IntegrationTest
                 new Book
                 {
                     Title = new BookTitle("LessThan\0"),
+                    /* L e s s T h a n (((\n >>> in SQLite this is NULL)))
+                    SQLite is written in C..... In C any String ends at \0
+                    r\0s >> in C read just r and stop
+                    De oplossing staat in GetBookSummariesQueryHandler.cs
+                    */
                     Author = new AuthorName("Riyad"),
                     Year = new PublicationYear(2026)
                 },
                 new Book
                 {
-                    Title = new BookTitle("THINDINGTEST"),
+                    Title = new BookTitle("THINKINGTEST"),
                     Author = new AuthorName("Mark"),
                     Year = new PublicationYear(2006)
                 });
@@ -316,7 +321,7 @@ public class BookListTests : IntegrationTest
         PagedResult<BookSummary> result = await response.ReadJsonAs<PagedResult<BookSummary>>(HttpStatusCode.OK);
 
         BookSummary book = Assert.Single(result.Items);
-        Assert.Equal("_OORLOG", book.Title);
+        Assert.Equal("LessThan\0", book.Title);
         Assert.Equal(1, result.TotalItems);
     }
 

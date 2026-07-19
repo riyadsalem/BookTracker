@@ -1,58 +1,83 @@
-# BookTracker — v1 (API)
+# 📚 Book Tracker
 
-BookTracker is a library management system. It is a project designed with a proper backend foundation from the ground up, following clean architecture and solid engineering practices. This first version (v1) focuses on the API layer: a complete, production style backend for managing a book catalog and its members (create, update, delete, list), built with **.NET 8 Minimal APIs**. Future versions may build on top of this foundation with additional capabilities.
+A full-stack library management system — **.NET 8 API + React/TypeScript frontend** — built to demonstrate production-grade backend architecture, authentication/authorization design, and modern frontend patterns.
 
-## Features
+> Started as a simple CRUD API and evolved step by step into a fully authenticated, role-based application with JWT auth, optimistic concurrency, EF Core migrations, and a React frontend — each capability added deliberately, with tests locking in the behavior.
 
-**Clean layered architecture**: clear separation between `Domain` (domain logic), `Application` (Command/Query handlers), `Storage` (EF Core repository), and `Endpoints` (REST API), applied consistently to both `Books` and `Members`.
+## ✨ What this project demonstrates
 
-**Value Objects for validation**: types like `BookTitle`, `AuthorName`, `MemberName` and `MemberEmail` guarantee that incoming data is always valid, with clear error messages via `DomainException`.
+| Area | What's implemented |
+|---|---|
+| **Clean Architecture** | Domain / Application / Storage / Endpoints, cleanly separated |
+| **Domain-Driven Design** | Value Objects (`BookTitle`, `MemberEmail`, `PublicationYear`...) make invalid state unrepresentable |
+| **Authentication** | JWT-based login, password hashing (`IPasswordHasher<T>`), no plain-text passwords, ever |
+| **Authorization** | Role-based access (`Member` / `Administrator`), enforced in the **domain layer** — not scattered across routes |
+| **Concurrency control** | Optimistic locking on book edits — `409 Conflict` instead of silently losing someone's changes |
+| **Database migrations** | EF Core migrations (not `EnsureCreated`) — explicit, reviewable schema changes |
+| **Security-mindedness** | SQL `LIKE` wildcard injection prevented, NUL-byte edge cases handled, CORS locked to a known origin |
+| **Testing** | Unit tests for domain rules + full integration test suite (success, validation, `401`/`403`/`404`/`409` paths) |
+| **Modern frontend** | React 19, TypeScript, React Router, TanStack Query — optimistic UI, cache invalidation, route guards |
+| **CI/CD** | GitHub Actions running the full test suite on every push |
 
-**Real persistence**: EF Core with SQLite, instead of in-memory storage.
+## 🏗️ Architecture
 
-**Pagination & search**: built-in support for paging through results and searching by title/author (Books) or name/email (Members). Search input is safely escaped, so special SQL `LIKE` characters (`%`, `_`) are always treated as literal text, never as wildcards.
-
-**Automatic seed data**: the database is populated with realistic fake data on startup in the development environment.
-
-**Full test coverage**: unit tests for the Value Objects, and integration tests covering every API endpoint for both Books and Members, including regression tests that lock in bug fixes (such as the search wildcard escaping fix) so they can't silently reappear.
-
-**Continuous Integration**: via GitHub Actions, automatically running `dotnet restore` and `dotnet test` on every push and pull request.
-
-**Interactive API docs**: via Swagger/OpenAPI (Swashbuckle).
-
-## API (v1)
-
-A clean, resource oriented API for the `books` catalog and its `members`, with predictable responses and validated input.
-
-Full request/response details are available through the built-in Swagger/OpenAPI documentation once the project is running, and sample requests for every endpoint (including edge cases) can be found in `BookTracker.Api/BookTracker.Api.http`.
-
-## Tech Stack
-
-.NET 8
-
-ASP.NET Core Minimal APIs
-
-Entity Framework Core + SQLite
-
-Swashbuckle (OpenAPI/Swagger)
-
-xUnit for testing (unit and integration tests)
-
-GitHub Actions for CI
-
-## Getting Started
-
-```bash
-git clone <repo-url>
-cd BookTracker
-dotnet restore
-dotnet run --project BookTracker.Api
+```
+HTTP Request
+     │
+     ▼
+JWT Authentication  →  ClaimsPrincipal  →  Actor (plain domain object)
+                                                │
+                                                ▼
+                              Handler  →  BookPermissions / MemberPermissions
+                                                │
+                                                ▼
+                                    Repository  →  EF Core  →  SQLite
 ```
 
-## Running Tests
+Authorization rules live as plain, unit-testable domain functions — not `[Authorize]` attributes scattered across controllers. The same rule applies whether the action is triggered by an HTTP request, a background job, or a script.
+
+## 🧰 Tech Stack
+
+**Backend:** .NET 8 · ASP.NET Core Minimal APIs · Entity Framework Core · SQLite · JWT Bearer Auth · xUnit
+
+**Frontend:** React 19 · TypeScript · Vite · React Router · TanStack Query
+
+**Tooling:** GitHub Actions · EF Core Migrations · ESLint
+
+## 🚀 Quick Start
 
 ```bash
+# Backend
+dotnet restore
+dotnet user-secrets set "Jwt:SigningKey" "a-long-random-dev-key" --project BookTracker.Api
+dotnet user-secrets set "DevelopmentAdmin:Password" "dev-admin-password" --project BookTracker.Api
+dotnet run --project BookTracker.Api
+
+# Frontend (separate terminal)
+cd Frontend && npm install && npm run dev
+```
+
+```bash
+# Run the tests
 dotnet test
 ```
 
-The test suite includes both unit tests (Value Objects) and integration tests (full HTTP request/response cycle against an in-memory SQLite database) for every endpoint, for Books and Members alike.
+## 📡 API at a glance
+
+| | Public | Member | Administrator |
+|---|:---:|:---:|:---:|
+| Browse books | ✅ | ✅ | ✅ |
+| Create / edit / delete books | | | ✅ |
+| Register account | ✅ | | |
+| View / edit own account | | ✅ | ✅ |
+| Manage other members | | | ✅ |
+
+Full schemas via Swagger; sample requests in `BookTracker.Api/BookTracker.Api.http`.
+
+## 🧪 Testing philosophy
+
+Every bug fixed along the way (a SQL wildcard-injection issue, a `NullReferenceException` on `null` input, a lost-update race condition) shipped with a **regression test** — so the same class of bug can't silently come back.
+
+---
+
+*Built as a hands-on exercise in production backend engineering: architecture decisions, security tradeoffs, and testing discipline over raw feature count.*

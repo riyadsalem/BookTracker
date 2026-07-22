@@ -6,6 +6,7 @@ using BookTracker.Api.Seeding;
 using BookTracker.Api.Storage;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using BookTracker.Api.Middleware;
 
 namespace BookTracker.Api.Wiring;
 
@@ -39,10 +40,9 @@ public static class WebApplicationExtensions
             }
         }
 
+        app.UseMiddleware<ExceptionHandlingMiddleware>();
         app.UseAuthentication(); // Who are YOU?
         app.UseAuthorization(); // Are YOU allowed???
-
-
         app.MapAuthEndpoints();
         app.MapBookEndpoints();
         app.MapMemberEndpoints();

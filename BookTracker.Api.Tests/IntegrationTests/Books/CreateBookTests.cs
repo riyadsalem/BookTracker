@@ -6,7 +6,9 @@ using BookTracker.Api.Domain.Members;
 
 namespace BookTracker.Api.Tests.IntegrationTests.Books;
 
-public class CreateBookTests : IntegrationTest
+[Collection(PostgreSqlCollection.Name)]
+public class CreateBookTests(PostgreSqlFixture database)
+    : IntegrationTest(database)
 {
 
     [Fact]

@@ -5,7 +5,8 @@ using BookTracker.Api.Domain.Members;
 
 namespace BookTracker.Api.Tests.IntegrationTests.Members;
 
-public class UpdateMemberTests : IntegrationTest
+[Collection(PostgreSqlCollection.Name)]
+public class UpdateMemberTests(PostgreSqlFixture database) : IntegrationTest(database)
 {
     [Fact]
     public async Task PutMemberUpdatesMember()

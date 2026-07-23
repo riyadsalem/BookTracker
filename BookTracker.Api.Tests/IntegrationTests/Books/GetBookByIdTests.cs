@@ -4,7 +4,8 @@ using BookTracker.Api.Domain.Books;
 
 namespace BookTracker.Api.Tests.IntegrationTests.Books;
 
-public class GetBookByIdTests : IntegrationTest
+[Collection(PostgreSqlCollection.Name)]
+public class GetBookByIdTests(PostgreSqlFixture database) : IntegrationTest(database)
 {
     [Fact]
     public async Task GetBookDetailsReturnsBookDetail()

@@ -1,10 +1,13 @@
 using System.Net;
+using System.Net.Http.Json;
+using BookTracker.Api.Application.Members.CreateMember;
 using BookTracker.Api.Application.Members.GetMemberSummaries;
 using BookTracker.Api.Domain.Members;
 
 namespace BookTracker.Api.Tests.IntegrationTests.Members;
 
-public class GetMemberSummariesTests : IntegrationTest
+[Collection(PostgreSqlCollection.Name)]
+public class GetMemberSummariesTests(PostgreSqlFixture database) : IntegrationTest(database)
 {
     [Fact]
     public async Task GetMemberSummariesReturnsMembers()
@@ -201,34 +204,50 @@ public class GetMemberSummariesTests : IntegrationTest
         Assert.Equal(1, result.TotalItems);
     }
 
-    [Fact]
-    public async Task SearchByStringTerminatorReturnsExactMatch()
-    {
-        await AuthenticateAsMember(MemberRole.Administrator);
-
-        Writer.Seed(db =>
+    /*
+        [Fact] // SQLite
+        public async Task SearchByStringTerminatorReturnsExactMatch()
         {
-            db.Members.AddRange(
-                new Member
-                {
-                    Name = new MemberName("LessThan\0"),
-                    Email = new MemberEmail("riyad@gmail.com"),
-                    PasswordHash = "test-password-hash"
-                },
-                new Member
-                {
-                    Name = new MemberName("THINKINGTEST"),
-                    Email = new MemberEmail("mark@gmail.com"),
-                    PasswordHash = "test-password-hash"
-                });
-        });
+            await AuthenticateAsMember(MemberRole.Administrator);
 
-        var response = await Client.GetAsync("/members?search=\0");
-        GetMemberSummariesResponse result = await response.ReadJsonAs<GetMemberSummariesResponse>(HttpStatusCode.OK);
+            Writer.Seed(db =>
+            {
+                db.Members.AddRange(
+                    new Member
+                    {
+                        Name = new MemberName("LessThan\0"),
+                        Email = new MemberEmail("riyad@gmail.com"),
+                        PasswordHash = "test-password-hash"
+                    },
+                    new Member
+                    {
+                        Name = new MemberName("THINKINGTEST"),
+                        Email = new MemberEmail("mark@gmail.com"),
+                        PasswordHash = "test-password-hash"
+                    });
+            });
 
-        MemberSummary member = Assert.Single(result.Items);
-        Assert.Equal("LessThan\0", member.Name);
-        Assert.Equal(1, result.TotalItems);
+            var response = await Client.GetAsync("/members?search=\0");
+            GetMemberSummariesResponse result = await response.ReadJsonAs<GetMemberSummariesResponse>(HttpStatusCode.OK);
+
+            MemberSummary member = Assert.Single(result.Items);
+            Assert.Equal("LessThan\0", member.Name);
+            Assert.Equal(1, result.TotalItems);
+        }
+    */
+
+    [Fact]
+    public async Task CreateMemberRejectsNameWithNullCharacter()
+    {
+        CreateMemberRequest request = new()
+        {
+            Name = "LessThan\0",
+            Email = "riyad@gmail.com",
+            Password = "analytical-engine"
+        };
+
+        var response = await Client.PostAsJsonAsync("/members", request);
+        await response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
     }
 
 }

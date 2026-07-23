@@ -1,12 +1,16 @@
 using System.Net;
 using System.Net.Http.Json;
+using BookTracker.Api.Application.Books.CreateBook;
 using BookTracker.Api.Application.Books.GetBookSummaries;
 using BookTracker.Api.Application.GetBookSummaries;
 using BookTracker.Api.Domain.Books;
+using BookTracker.Api.Domain.Members;
 
 namespace BookTracker.Api.Tests.IntegrationTests.Books;
 
-public class BookListTests : IntegrationTest
+[Collection(PostgreSqlCollection.Name)]
+public class BookListTests(PostgreSqlFixture database) : IntegrationTest(database)
+
 {
     [Fact]
     public async Task GetBookSummariesReturnsBookSummaries()
@@ -292,37 +296,57 @@ public class BookListTests : IntegrationTest
         Assert.Equal(1, result.TotalItems);
     }
 
-    [Fact]
-    public async Task SearchByStringTerminatorReturnsExactMatch()
-    {
-        Writer.Seed(db =>
+    /*
+        [Fact] // SQLite
+        public async Task SearchByStringTerminatorReturnsExactMatch()
         {
-            db.Books.AddRange(
-                new Book
-                {
-                    Title = new BookTitle("LessThan\0"),
-                    /* L e s s T h a n (((\n >>> in SQLite this is NULL)))
-                    SQLite is written in C..... In C any String ends at \0
-                    r\0s >> in C read just r and stop
-                    De oplossing staat in GetBookSummariesQueryHandler.cs
-                    */
-                    Author = new AuthorName("Riyad"),
-                    Year = new PublicationYear(2026)
-                },
-                new Book
-                {
-                    Title = new BookTitle("THINKINGTEST"),
-                    Author = new AuthorName("Mark"),
-                    Year = new PublicationYear(2006)
-                });
-        });
+            Writer.Seed(db =>
+            {
+                db.Books.AddRange(
+                    new Book
+                    {
+                        Title = new BookTitle("LessThan\0"),
 
-        var response = await Client.GetAsync("/books?search=\0");
-        PagedResult<BookSummary> result = await response.ReadJsonAs<PagedResult<BookSummary>>(HttpStatusCode.OK);
+                        // L e s s T h a n(((\n >>> in SQLite this is NULL)))
+                        // SQLite is written in C..... In C any String ends at \0
+                        // r\0s >> in C read just r and stop
+                        //  De oplossing staat in GetBookSummariesQueryHandler.cs
 
-        BookSummary book = Assert.Single(result.Items);
-        Assert.Equal("LessThan\0", book.Title);
-        Assert.Equal(1, result.TotalItems);
+                        Author = new AuthorName("Riyad"),
+                        Year = new PublicationYear(2026)
+                    },
+                        new Book
+                        {
+                            Title = new BookTitle("THINKINGTEST"),
+                            Author = new AuthorName("Mark"),
+                            Year = new PublicationYear(2006)
+                        });
+            });
+
+            var response = await Client.GetAsync("/books?search=\0");
+            PagedResult<BookSummary> result = await response.ReadJsonAs<PagedResult<BookSummary>>(HttpStatusCode.OK);
+
+            BookSummary book = Assert.Single(result.Items);
+            Assert.Equal("LessThan\0", book.Title);
+            Assert.Equal(1, result.TotalItems);
+        }
+        */
+
+
+    [Fact]
+    public async Task CreateBookRejectsTitleWithNullCharacter()
+    {
+        await AuthenticateAsMember(MemberRole.Administrator);
+
+        CreateBookRequest request = new()
+        {
+            Title = "LessThan\0",
+            Author = "Riyad",
+            Year = 2026
+        };
+
+        var response = await Client.PostAsJsonAsync("/books", request);
+        await response.ShouldHaveStatusCode(HttpStatusCode.BadRequest); // vlaueObjects
     }
 
 }

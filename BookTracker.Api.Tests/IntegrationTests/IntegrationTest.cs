@@ -7,17 +7,32 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BookTracker.Api.Tests.IntegrationTests;
 
-public abstract class IntegrationTest : IDisposable
+public abstract class IntegrationTest : IAsyncLifetime
 {
-    private readonly CustomWebApplicationFactory factory = new();
+    private readonly PostgreSqlFixture database;
+    private readonly CustomWebApplicationFactory factory;
+
     protected HttpClient Client { get; }
     protected EfReader Reader { get; }
     protected EfWriter Writer { get; }
-    protected IntegrationTest()
+
+    protected IntegrationTest(PostgreSqlFixture database)
     {
+        this.database = database;
+        factory = new CustomWebApplicationFactory(database);
         Client = factory.CreateClient();
         Reader = factory.GetReader();
         Writer = factory.GetWriter();
+    }
+
+    public Task InitializeAsync() => database.ResetAsync();
+
+
+    public Task DisposeAsync()
+    {
+        Client.Dispose();
+        factory.Dispose();
+        return Task.CompletedTask;
     }
 
     protected async Task<int> AuthenticateAsMember(
@@ -34,7 +49,7 @@ public abstract class IntegrationTest : IDisposable
             Role = role
         };
 
-        PasswordHasher<Member> passwordHasher = new();
+        var passwordHasher = new PasswordHasher<Member>();
 
         member.PasswordHash = passwordHasher.HashPassword(member, password);
 
@@ -50,14 +65,9 @@ public abstract class IntegrationTest : IDisposable
 
         LoginResponse login = await response.ReadJsonAs<LoginResponse>(HttpStatusCode.OK);
 
-        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+        Client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", login.AccessToken);
 
         return member.Id;
-    }
-
-    public void Dispose()
-    {
-        Client.Dispose();
-        factory.Dispose();
     }
 }

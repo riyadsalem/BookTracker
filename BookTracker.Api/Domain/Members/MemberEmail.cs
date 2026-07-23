@@ -9,6 +9,9 @@ public record MemberEmail
         if (string.IsNullOrWhiteSpace(value))
             throw new DomainException("Email is required.");
 
+        if (value.Contains('\0'))
+            throw new DomainException("Email cannot contain a null character.");
+
         value = value.Trim().ToLowerInvariant();
 
         if (value.Length > MaxLength)

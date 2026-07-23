@@ -32,6 +32,8 @@ public class GetBookSummariesQueryHandler(AppDbContext dbContext) : IHandler
             Daarna we collect the IDs and continue the query with these IDs. Zo paging and counting still work correctly...
             And also the SearchByStringTerminatorReturnsExactMatch test passes.
             */
+
+            // Deza allen in SQLite (nooit in PostegreSQL)
             if (request.Search.Contains('\0')) // search contains (\0 >> NULL value) DUS gebruik niet SQL
             {
                 string term = request.Search.Trim();
@@ -51,8 +53,8 @@ public class GetBookSummariesQueryHandler(AppDbContext dbContext) : IHandler
                 String search = $"%{searchResult}%";
 
                 query = query.Where(book =>
-                    EF.Functions.Like((string)book.Title, search, "\\") ||
-                    EF.Functions.Like((string)book.Author, search, "\\"));
+                    EF.Functions.ILike((string)book.Title, search, "\\") ||
+                    EF.Functions.ILike((string)book.Author, search, "\\"));
             }
         }
         int totalItems = await query.CountAsync(); // EF Core 

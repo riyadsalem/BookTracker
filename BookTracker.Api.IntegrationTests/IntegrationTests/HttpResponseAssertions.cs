@@ -2,7 +2,7 @@ using System.Net;
 using System.Text.Json;
 using Xunit.Sdk;
 
-namespace BookTracker.Api.Tests.IntegrationTests;
+namespace BookTracker.Api.IntegrationTests;
 
 public static class HttpResponseAssertions
 {

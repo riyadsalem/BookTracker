@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Testcontainers.PostgreSql;
 
-namespace BookTracker.Api.Tests.IntegrationTests;
+namespace BookTracker.Api.IntegrationTests;
 
 public sealed class PostgreSqlFixture : IAsyncLifetime
 {

@@ -2,7 +2,7 @@ using System.Net;
 using BookTracker.Api.Application.Books.GetBookDetails;
 using BookTracker.Api.Domain.Books;
 
-namespace BookTracker.Api.Tests.IntegrationTests.Books;
+namespace BookTracker.Api.IntegrationTests.Books;
 
 [Collection(PostgreSqlCollection.Name)]
 public class GetBookByIdTests(PostgreSqlFixture database) : IntegrationTest(database)

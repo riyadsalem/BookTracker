@@ -2,7 +2,7 @@ using System.Net;
 using BookTracker.Api.Application.Members.GetMemberDetails;
 using BookTracker.Api.Domain.Members;
 
-namespace BookTracker.Api.Tests.IntegrationTests.Members;
+namespace BookTracker.Api.IntegrationTests.Members;
 
 [Collection(PostgreSqlCollection.Name)]
 public class GetMemberDetailsTests(PostgreSqlFixture database) : IntegrationTest(database)

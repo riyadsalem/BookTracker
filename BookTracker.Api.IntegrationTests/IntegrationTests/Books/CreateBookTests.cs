@@ -4,7 +4,7 @@ using BookTracker.Api.Application.Books.CreateBook;
 using BookTracker.Api.Domain.Books;
 using BookTracker.Api.Domain.Members;
 
-namespace BookTracker.Api.Tests.IntegrationTests.Books;
+namespace BookTracker.Api.IntegrationTests.Books;
 
 [Collection(PostgreSqlCollection.Name)]
 public class CreateBookTests(PostgreSqlFixture database)

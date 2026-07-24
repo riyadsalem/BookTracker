@@ -1,4 +1,4 @@
-namespace BookTracker.Api.Tests.IntegrationTests;
+namespace BookTracker.Api.IntegrationTests;
 
 [CollectionDefinition(
     "PostgreSQL integration tests",

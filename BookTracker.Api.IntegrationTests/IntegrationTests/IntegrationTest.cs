@@ -5,7 +5,7 @@ using BookTracker.Api.Application.Auth.Login;
 using BookTracker.Api.Domain.Members;
 using Microsoft.AspNetCore.Identity;
 
-namespace BookTracker.Api.Tests.IntegrationTests;
+namespace BookTracker.Api.IntegrationTests;
 
 public abstract class IntegrationTest : IAsyncLifetime
 {

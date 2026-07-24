@@ -5,7 +5,7 @@ using BookTracker.Api.Application.Members.CreateMember;
 using BookTracker.Api.Domain.Members;
 using Microsoft.AspNetCore.Identity;
 
-namespace BookTracker.Api.Tests.IntegrationTests.Members;
+namespace BookTracker.Api.IntegrationTests.Members;
 
 [Collection(PostgreSqlCollection.Name)]
 public class CreateMemberTests(PostgreSqlFixture database) : IntegrationTest(database)

@@ -4,7 +4,7 @@ using BookTracker.Api.Application.Members.CreateMember;
 using BookTracker.Api.Application.Members.GetMemberSummaries;
 using BookTracker.Api.Domain.Members;
 
-namespace BookTracker.Api.Tests.IntegrationTests.Members;
+namespace BookTracker.Api.IntegrationTests.Members;
 
 [Collection(PostgreSqlCollection.Name)]
 public class GetMemberSummariesTests(PostgreSqlFixture database) : IntegrationTest(database)

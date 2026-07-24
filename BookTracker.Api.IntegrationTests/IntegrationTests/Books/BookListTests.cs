@@ -6,7 +6,7 @@ using BookTracker.Api.Application.GetBookSummaries;
 using BookTracker.Api.Domain.Books;
 using BookTracker.Api.Domain.Members;
 
-namespace BookTracker.Api.Tests.IntegrationTests.Books;
+namespace BookTracker.Api.IntegrationTests.Books;
 
 [Collection(PostgreSqlCollection.Name)]
 public class BookListTests(PostgreSqlFixture database) : IntegrationTest(database)

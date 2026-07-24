@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 
-namespace BookTracker.Api.Tests.IntegrationTests;
+namespace BookTracker.Api.IntegrationTests;
 
 public class CustomWebApplicationFactory(PostgreSqlFixture database) : WebApplicationFactory<Program>
 {

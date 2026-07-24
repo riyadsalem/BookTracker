@@ -4,7 +4,7 @@ using BookTracker.Api.Application.Auth.Login;
 using BookTracker.Api.Domain.Members;
 using Microsoft.AspNetCore.Identity;
 
-namespace BookTracker.Api.Tests.IntegrationTests.Auth.Login;
+namespace BookTracker.Api.IntegrationTests.Auth.Login;
 
 [Collection(PostgreSqlCollection.Name)]
 public class LoginTests(PostgreSqlFixture database) : IntegrationTest(database)

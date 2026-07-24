@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using BookTracker.Api.Application.Members.UpdateMember;
 using BookTracker.Api.Domain.Members;
 
-namespace BookTracker.Api.Tests.IntegrationTests.Members;
+namespace BookTracker.Api.IntegrationTests.Members;
 
 [Collection(PostgreSqlCollection.Name)]
 public class UpdateMemberTests(PostgreSqlFixture database) : IntegrationTest(database)

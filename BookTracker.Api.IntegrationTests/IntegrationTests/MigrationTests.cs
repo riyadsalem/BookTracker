@@ -1,7 +1,7 @@
 using BookTracker.Api.Domain.Books;
 using Microsoft.EntityFrameworkCore;
 
-namespace BookTracker.Api.Tests.IntegrationTests.Migrations;
+namespace BookTracker.Api.IntegrationTests;
 
 [Collection(PostgreSqlCollection.Name)]
 public class MigrationTests(PostgreSqlFixture database)

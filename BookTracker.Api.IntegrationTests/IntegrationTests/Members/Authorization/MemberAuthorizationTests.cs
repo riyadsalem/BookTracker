@@ -4,7 +4,7 @@ using BookTracker.Api.Application.Members.CreateMember;
 using BookTracker.Api.Application.Members.UpdateMember;
 using BookTracker.Api.Domain.Members;
 
-namespace BookTracker.Api.Tests.IntegrationTests.Members.Authorization;
+namespace BookTracker.Api.IntegrationTests.Members.Authorization;
 
 [Collection(PostgreSqlCollection.Name)]
 public class MemberAuthorizationTests(PostgreSqlFixture database) : IntegrationTest(database)

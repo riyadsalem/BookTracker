@@ -1,7 +1,7 @@
 using BookTracker.Api.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BookTracker.Api.Tests.IntegrationTests;
+namespace BookTracker.Api.IntegrationTests;
 
 public class EfWriter(IServiceProvider services)
 {

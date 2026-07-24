@@ -6,7 +6,7 @@ using BookTracker.Api.Application.Auth.Login;
 using BookTracker.Api.Domain.Members;
 using Microsoft.AspNetCore.Identity;
 
-namespace BookTracker.Api.Tests.IntegrationTests.Auth.GetCurrentMember;
+namespace BookTracker.Api.IntegrationTests.Auth.GetCurrentMember;
 
 [Collection(PostgreSqlCollection.Name)]
 public class GetCurrentMemberTests(PostgreSqlFixture database) : IntegrationTest(database)

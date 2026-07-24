@@ -1,7 +1,7 @@
 using System.Net;
 using BookTracker.Api.Domain.Members;
 
-namespace BookTracker.Api.Tests.IntegrationTests.Members;
+namespace BookTracker.Api.IntegrationTests.Members;
 
 [Collection(PostgreSqlCollection.Name)]
 public class DeleteMemberTests(PostgreSqlFixture database) : IntegrationTest(database)

@@ -1,0 +1,19 @@
+@using BookTracker.Blazor.Models.Books
+
+<article @onclick="HandleClick" style="cursor: pointer;">
+    <h2>@Book.Title</h2>
+    @if (ShowAuthor)
+    {
+        <p>@Book.Author</p>
+    }
+</article>
+
+@code {
+    [Parameter] // Props van BookTracker.razo
+    public required BookSummary Book { get; set; }
+    [Parameter]
+    public bool ShowAuthor { get; set; } = true;
+    [Parameter]
+    public EventCallback<int> OnSelected { get; set; }
+    private async Task HandleClick() => await OnSelected.InvokeAsync(Book.Id);
+}

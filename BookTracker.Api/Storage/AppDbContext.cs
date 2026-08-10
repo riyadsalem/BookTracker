@@ -17,7 +17,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             book.Property(b => b.Title)
                 .HasConversion(title => title.Value, value => new BookTitle(value))
                 .HasMaxLength(BookTitle.MaxLength);
-
             book.Property(b => b.Author)
             .HasConversion(author => author.Value, value => new AuthorName(value))
             // author => author.Value >> TO DB (SAVE)

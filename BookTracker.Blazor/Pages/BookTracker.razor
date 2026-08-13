@@ -3,6 +3,7 @@
 @using global::BookTracker.Blazor.Models.Books
 @using global::BookTracker.Blazor.Components.Books
 @inject BookTrackerClient BookTrackerClient
+@inject NavigationManager NavigationManager
 
 <PageTitle>Book Tracker</PageTitle>
 
@@ -47,11 +48,6 @@ else if (result is not null)
     }
 }
 
-@if (selectedBookId is not null)
-{
-    <p>Geselecteerd boek id: @selectedBookId</p>
-}
-
 @code {
     // SERVICE LAYER (Query) & FUNCTIONS LAYER
     private const int PageSize = 10;
@@ -62,7 +58,6 @@ else if (result is not null)
     private string? activeSearch;
     private int currentPage = 1;
     private bool showAuthors = true;
-    private int? selectedBookId;
     protected override async Task OnInitializedAsync() => await LoadBooks(); // UserEffect [empty]
     private async Task LoadBooks()
     {
@@ -98,5 +93,5 @@ else if (result is not null)
         await LoadBooks();
     }
     private void ToggleAuthors() => showAuthors = !showAuthors;
-    private void HandleBookSelected(int bookId) => selectedBookId = bookId;
+    private void HandleBookSelected(int bookId) => NavigationManager.NavigateTo($"/books/{bookId}");
 }

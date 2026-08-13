@@ -1,6 +1,6 @@
 @using BookTracker.Blazor.Models.Books
 
-<article @onclick="HandleClick" style="cursor: pointer;">
+<article @onclick="HandleClick" style="cursor: pointer; border: 1px solid black; margin-top: 1rem; padding: 1rem;">
     <h2>@Book.Title</h2>
     @if (ShowAuthor)
     {

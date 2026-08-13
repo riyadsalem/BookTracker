@@ -1,0 +1,50 @@
+@page "/books/{Id:int}"
+@using global::BookTracker.Blazor.Api
+@using global::BookTracker.Blazor.Models.Books
+@inject BookTrackerClient BookTrackerClient
+
+<PageTitle>Book Tracker</PageTitle>
+
+@if (loading)
+{
+    <p>Boek laden...</p>
+}
+else if (errorMessage is not null)
+{
+    <p>@errorMessage</p>
+    <a href="/booktracker">Terug naar de boekenlijst</a>
+}
+else if (book is null)
+{
+    <p>Dit boek bestaat niet.</p>
+    <a href="/booktracker">Terug naar de blekenlijst</a>
+}
+else
+{
+    <h1>@book.Title</h1>
+    <p>Auteur: @book.Author</p>
+    <p>Jaar: @book.Year</p>
+    <a href="/booktracker">Terug naar de boeknlijst</a>
+
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private BookDetailsResponse? book;
+    private bool loading;
+    private string? errorMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+        errorMessage = null;
+        book = null;
+
+        try { book = await BookTrackerClient.GetBookDetails(Id); }
+        catch (Exception)
+        {
+            errorMessage = "Boekdetails konden niet worden geladen. Is de API bereikbaar?";
+        }
+        finally { loading = false; }
+    }
+}

@@ -1,0 +1,66 @@
+@page "/login"
+@using global::BookTracker.Blazor.Api
+@using global::BookTracker.Blazor.Auth
+@using global::BookTracker.Blazor.Models.Auth
+@inject BookTrackerClient BookTrackerClient
+@inject IAuthSession AuthSession
+@inject NavigationManager NavigationManager
+
+<PageTitle>Inloggen</PageTitle>
+
+<h1>Inloggen</h1>
+
+<EditForm Model="model" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <label for="email">Email</label>
+    <InputText id="email" @bind-Value="model.Email" />
+    <ValidationMessage For="@(() => model.Email)" />
+
+    <label for="password">Password</label>
+    <InputText id="password" type="password" @bind-Value="model.Password" />
+    <ValidationMessage For="@(() => model.Password)" />
+
+    <button type="submit" disabled="@isSubmitting">
+        @(isSubmitting ? "Bezig met inloggen..." : "Inloggen")
+    </button>
+</EditForm>
+
+@if (invalidCredentials)
+{
+    <p>E-mail of wachtwoord is onjuist.</p>
+}
+
+@if (errorMessage is not null)
+{
+    <p>@errorMessage</p>
+}
+
+@code {
+    private readonly LoginRequest model = new();
+    private bool isSubmitting;
+    private bool invalidCredentials;
+    private string? errorMessage;
+    private async Task HandleLogin()
+    {
+        isSubmitting = true;
+        invalidCredentials = false;
+        errorMessage = null;
+
+        try
+        {
+            LoginResponse? response = await BookTrackerClient.Login(model);
+
+            if (response is null)
+            {
+                invalidCredentials = true;
+                return;
+            }
+            await AuthSession.SetTokenAsync(response.AccessToken);
+            NavigationManager.NavigateTo("/booktracker");
+        }
+        catch (Exception) { errorMessage = "Inloggen is mislukt. Is de API bereikbaar?"; }
+        finally { isSubmitting = false; }
+    }
+}

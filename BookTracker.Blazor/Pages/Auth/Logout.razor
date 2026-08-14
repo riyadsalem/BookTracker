@@ -1,6 +1,6 @@
 @page "/logout"
 @using global::BookTracker.Blazor.Auth
-@inject IAuthSession AuthSession
+@inject BookTrackerAuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 
 <PageTitle>Uitloggen</PageTitle>
@@ -10,7 +10,7 @@
 @code {
     protected override async Task OnInitializedAsync()
     {
-        await AuthSession.ClearTokenAsync();
+        await AuthenticationStateProvider.SignOutAsync();
         NavigationManager.NavigateTo("/booktracker");
     }
 }

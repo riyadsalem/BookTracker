@@ -19,7 +19,7 @@ public class LoginTests : BunitContext
         => await respond(request);
     }
 
-    private FakeAuthSession RegisterClientAndSession(Func<HttpRequestMessage, Task<HttpResponseMessage>> respond)
+    private (FakeAuthSession Session, BookTrackerAuthenticationStateProvider Provider) RegisterClientAndProvider(Func<HttpRequestMessage, Task<HttpResponseMessage>> respond)
     {
         var httpClient = new HttpClient(new FakeHandler(respond))
         {
@@ -28,9 +28,12 @@ public class LoginTests : BunitContext
         Services.AddSingleton(new BookTrackerClient(httpClient));
 
         FakeAuthSession fakeSession = new();
-        Services.AddSingleton<IAuthSession>(fakeSession);
+        BookTrackerAuthenticationStateProvider provider = new(fakeSession);
 
-        return fakeSession;
+        Services.AddSingleton(provider);
+        Services.AddSingleton<Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider>(provider);
+
+        return (fakeSession, provider);
     }
 
     [Fact]
@@ -39,20 +42,20 @@ public class LoginTests : BunitContext
     {
         HttpRequestMessage? capturedRequest = null;
 
-        FakeAuthSession session = RegisterClientAndSession(async request =>
+        var (session, _) = RegisterClientAndProvider(async request =>
         // Fake Client & Fake Session
-        {
-            capturedRequest = request;
-            LoginResponse body = new() // Fake Response
-            {
-                AccessToken = "fake-token",
-                ExpiresAt = DateTime.UtcNow.AddHours(1)
-            };
-            return new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = JsonContent.Create(body)
-            };
-        });
+      {
+          capturedRequest = request;
+          LoginResponse body = new() // Fake Response
+          {
+              AccessToken = "fake-token",
+              ExpiresAt = DateTime.UtcNow.AddHours(1)
+          };
+          return new HttpResponseMessage(HttpStatusCode.OK)
+          {
+              Content = JsonContent.Create(body)
+          };
+      });
 
         var cut = Render<Login>();
 
@@ -71,7 +74,7 @@ public class LoginTests : BunitContext
     {
         bool requestSent = false;
 
-        RegisterClientAndSession(_ =>
+        RegisterClientAndProvider(_ =>
         {
             requestSent = true;
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
@@ -88,7 +91,7 @@ public class LoginTests : BunitContext
     [Fact]
     public void ShowsError_For_InvalidCredentials()
     {
-        RegisterClientAndSession(_ => Task.FromResult(new HttpResponseMessage(HttpStatusCode.Unauthorized)));
+        RegisterClientAndProvider(_ => Task.FromResult(new HttpResponseMessage(HttpStatusCode.Unauthorized)));
 
         var cut = Render<Login>();
 
@@ -102,7 +105,7 @@ public class LoginTests : BunitContext
     [Fact]
     public void SuccessfulLoginStoresToken_And_NavigatesAway()
     {
-        FakeAuthSession session = RegisterClientAndSession(_ =>
+        var (session, _) = RegisterClientAndProvider(_ =>
         {
             LoginResponse body = new()
             {

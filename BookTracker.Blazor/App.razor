@@ -1,11 +1,45 @@
 ﻿<Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        @*
+        1 Authentication flow
+        2 the user navigates to a RUL
+        3 Router finds the matching page
+        4 Found
+        5 AuthorieRouteView
+        6 It meeds to know who the current user is
+        7 AuthenticationStateProvider
+        8 Program.cs tels Blazor to use BookTrackerAuthenticationStateProvider
+        9 GetAuthenticationStateAsync()
+        10 Gets the JWT form AuthSession
+        11 Converts the JWT data into a ClaimsPrincipal
+        12 Returns a AuthenticationState
+        13 AuthorizeRouteView checks.....
+         - Is the user authenticated??
+         - Does the user have the required role??
+         ----- Authorized => Show page
+         ----- Not Authorized => Show a message
+         ----- Authorizing => Checking session
+         *@
+        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)">
+            <Authorizing>
+                <p role="status">Session controleren...</p>
+            </Authorizing>
+            <NotAuthorized Context="authenticationState">
+                @if (authenticationState.User.Identity?.IsAuthenticated == true)
+                {
+                    <p>Je hebt geen toegang tot deze pagina.</p>
+                }
+                else
+                {
+                    <p>Log in om deze pagina te bekijken.</p>
+                }
+            </NotAuthorized>
+        </AuthorizeRouteView>
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
     <NotFound>
-        <PageTitle>Book Tracker</PageTitle>
-        <LayoutView Layout="@typeof(MainLayout)">
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(Layout.MainLayout)">
             <p role="alert">Sorry, there's nothing at this address.</p>
         </LayoutView>
     </NotFound>

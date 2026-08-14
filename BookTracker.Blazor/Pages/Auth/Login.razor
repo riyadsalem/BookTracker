@@ -3,7 +3,7 @@
 @using global::BookTracker.Blazor.Auth
 @using global::BookTracker.Blazor.Models.Auth
 @inject BookTrackerClient BookTrackerClient
-@inject IAuthSession AuthSession
+@inject BookTrackerAuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 
 <PageTitle>Inloggen</PageTitle>
@@ -57,7 +57,7 @@
                 invalidCredentials = true;
                 return;
             }
-            await AuthSession.SetTokenAsync(response.AccessToken);
+            await AuthenticationStateProvider.SignInAsync(response.AccessToken);
             NavigationManager.NavigateTo("/booktracker");
         }
         catch (Exception) { errorMessage = "Inloggen is mislukt. Is de API bereikbaar?"; }

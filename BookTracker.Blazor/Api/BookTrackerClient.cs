@@ -61,7 +61,7 @@ public sealed class BookTrackerClient(HttpClient httpClient)
 
         if (response.StatusCode == HttpStatusCode.BadRequest)
         {
-            var message = await TryReadErrorMessage(response);
+            string? message = await TryReadErrorMessage(response);
             return new CreateBookResult(CreateBookStatus.ValidationFailed,
                 ErrorMessage: message ?? "De opgegeven boekgegevens zijn ongeldig.");
         }
@@ -71,6 +71,40 @@ public sealed class BookTrackerClient(HttpClient httpClient)
         CreateBookResponse book = await response.Content.ReadFromJsonAsync<CreateBookResponse>() ?? throw new InvalidOperationException("Create book response was empty.");
 
         return new CreateBookResult(CreateBookStatus.Created, book);
+    }
+
+    public async Task<UpdateBookResult> UpdateBook(int id, UpdateBookRequest request)
+    {
+        var response = await httpClient.PutAsJsonAsync($"/books/{id}", request);
+
+        if (response.StatusCode == HttpStatusCode.NoContent)
+            return new UpdateBookResult(UpdateBookStatus.Updated);
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+            return new UpdateBookResult(UpdateBookStatus.Unauthorized);
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+            return new UpdateBookResult(UpdateBookStatus.Forbidden);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            return new UpdateBookResult(UpdateBookStatus.NotFound);
+
+        if (response.StatusCode == HttpStatusCode.Conflict)
+        {
+            string? conflictMessage = await TryReadErrorMessage(response);
+            return new UpdateBookResult(UpdateBookStatus.Conflict,
+                conflictMessage ?? "The book was changed by another user.");
+        }
+
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            string? validationMessage = await TryReadErrorMessage(response);
+            return new UpdateBookResult(UpdateBookStatus.ValidationFailed,
+                validationMessage ?? "De opgegeven boekgegevens zijn ongeldig.");
+        }
+
+        response.EnsureSuccessStatusCode();
+        throw new InvalidOperationException($"Unexpected status code {response.StatusCode} from PUT /books/{id}.");
     }
 
     private static async Task<string?> TryReadErrorMessage(HttpResponseMessage response)

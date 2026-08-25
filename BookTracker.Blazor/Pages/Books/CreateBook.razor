@@ -1,0 +1,79 @@
+@page "/books/create"
+@attribute [Authorize(Roles = "Administrator")]
+@using global::BookTracker.Blazor.Api
+@using global::BookTracker.Blazor.Models.Books
+@inject BookTrackerClient BookTrackerClient
+@inject NavigationManager NavigationManager
+
+<PageTitle>Boek Toevoegen</PageTitle>
+<h1>Boek toevoegen</h1>
+
+<EditForm Model="model" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <label for="title">Titel</label>
+    <InputText id="title" @bind-Value="model.Title" />
+    <ValidationMessage For="@(() => model.Title)" />
+
+    <label for="author">Auteur</label>
+    <InputText id="author" @bind-Value="model.Author" />
+    <ValidationMessage For="@(() => model.Author)" />
+
+    <label for="year">Jaar</label>
+    <InputNumber id="year" @bind-Value="model.Year" />
+    <ValidationMessage For="@(() => model.Year)" />
+
+    <button type="submit" disabled="@isSubmitting">
+        @(isSubmitting ? "Bezig met opslaan..." : "Opslaan")
+    </button>
+</EditForm>
+
+@if (errorMessage is not null)
+{
+    <p>@errorMessage</p>
+}
+
+@code {
+    private readonly CreateBookRequest model = new();
+    private bool isSubmitting;
+    private string? errorMessage;
+    private async Task HandleSubmit()
+    {
+        if (isSubmitting) return;
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            CreateBookResult result = await BookTrackerClient.CreateBook(model);
+
+            switch (result.Status)
+            {
+                case CreateBookStatus.Created:
+                    NavigationManager.NavigateTo($"/books/{result.Book!.Id}");
+                    break;
+
+                case CreateBookStatus.ValidationFailed:
+                    errorMessage = result.ErrorMessage;
+                    break;
+
+                case CreateBookStatus.Unauthorized:
+                    errorMessage = "Je bent niet meer ingelogd. Log opnieuw in.";
+                    break;
+
+                case CreateBookStatus.Forbidden:
+                    errorMessage = "Alleen administrators kunnen boeken toevoegen.";
+                    break;
+            }
+        }
+        catch (Exception)
+        {
+            errorMessage = "Het boek kon niet worden opgeslagen. Is de API bereikbaar?";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

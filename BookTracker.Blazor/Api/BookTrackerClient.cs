@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using BookTracker.Blazor.Models.Auth;
 using BookTracker.Blazor.Models.Books;
 
@@ -46,5 +47,42 @@ public sealed class BookTrackerClient(HttpClient httpClient)
         return await response.Content.ReadFromJsonAsync<LoginResponse>() ?? throw new InvalidOperationException("Login response was empty.");
         // ReadFromJsonAsync<LoginResponse>() (ex) >>> { "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...", "expiresAt": "2026-08-13T15:30:00Z" }
 
+    }
+
+    public async Task<CreateBookResult> CreateBook(CreateBookRequest request)
+    {
+        using var response = await httpClient.PostAsJsonAsync("/books", request);
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+            return new CreateBookResult(CreateBookStatus.Unauthorized);
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+            return new CreateBookResult(CreateBookStatus.Forbidden);
+
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var message = await TryReadErrorMessage(response);
+            return new CreateBookResult(CreateBookStatus.ValidationFailed,
+                ErrorMessage: message ?? "De opgegeven boekgegevens zijn ongeldig.");
+        }
+
+        response.EnsureSuccessStatusCode();
+
+        CreateBookResponse book = await response.Content.ReadFromJsonAsync<CreateBookResponse>() ?? throw new InvalidOperationException("Create book response was empty.");
+
+        return new CreateBookResult(CreateBookStatus.Created, book);
+    }
+
+    private static async Task<string?> TryReadErrorMessage(HttpResponseMessage response)
+    {
+        try
+        {
+            var error = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
+            return error?.Error;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
     }
 }

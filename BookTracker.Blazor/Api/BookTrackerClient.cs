@@ -126,6 +126,23 @@ public sealed class BookTrackerClient(HttpClient httpClient)
 
         throw new InvalidOperationException($"Unexpected status code {response.StatusCode} from DELETE /books/{id}.");
     }
+    public async Task<RegisterResult> Register(RegisterRequest request)
+    {
+        using var response = await httpClient.PostAsJsonAsync("/members", request);
+
+        if (response.StatusCode == HttpStatusCode.Conflict)
+            return new RegisterResult(RegisterStatus.EmailAlreadyExists, "Er bestaat al een account met dit e-mailadres.");
+
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            string? message = await TryReadErrorMessage(response);
+            return new RegisterResult(RegisterStatus.ValidationFailed,
+                message ?? "De opgegeven gegevens zijn ongeldig.");
+        }
+
+        response.EnsureSuccessStatusCode();
+        return new RegisterResult(RegisterStatus.Registered);
+    }
 
     private static async Task<string?> TryReadErrorMessage(HttpResponseMessage response)
     {

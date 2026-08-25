@@ -1,0 +1,83 @@
+@page "/register"
+@using global::BookTracker.Blazor.Api
+@using global::BookTracker.Blazor.Models.Auth
+@inject BookTrackerClient BookTrackerClient
+@inject NavigationManager NavigationManager
+
+<PageTitle>Registreren</PageTitle>
+
+<h1>Registreren</h1>
+
+<EditForm Model="model" OnValidSubmit="HandleRegister">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <label for="name">Naam</label>
+    <InputText id="name" @bind-Value="model.Name" />
+    <ValidationMessage For="@(() => model.Name)" />
+
+    <label for="email">E-mail</label>
+    <InputText id="email" @bind-Value="model.Email" />
+    <ValidationMessage For="@(() => model.Email)" />
+
+    <label for="password">Wachtwoord</label>
+    <InputText id="password" type="password" @bind-Value="model.Password" />
+    <ValidationMessage For="@(() => model.Password)" />
+
+    <label for="passwordConfirmation">Bevestig wachtwoord</label>
+    <InputText id="passwordConfirmation" type="password" @bind-Value="model.PasswordConfirmation" />
+    <ValidationMessage For="@(() => model.PasswordConfirmation)" />
+
+    <button type="submit" disabled="@isSubmitting">
+        @(isSubmitting ? "Bezig met registreren..." : "Registreren")
+    </button>
+</EditForm>
+
+@if (errorMessage is not null)
+{
+    <p>@errorMessage</p>
+}
+
+@code {
+    private readonly RegisterFormModel model = new();
+    private bool isSubmitting;
+    private string? errorMessage;
+    private async Task HandleRegister()
+    {
+        if (isSubmitting) return;
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            RegisterRequest request = new()
+            {
+                Name = model.Name,
+                Email = model.Email,
+                Password = model.Password
+            };
+
+            RegisterResult result = await BookTrackerClient.Register(request);
+
+            switch (result.Status)
+            {
+                case RegisterStatus.Registered:
+                    NavigationManager.NavigateTo("/login");
+                    break;
+
+                case RegisterStatus.ValidationFailed:
+                case RegisterStatus.EmailAlreadyExists:
+                    errorMessage = result.ErrorMessage;
+                    break;
+            }
+        }
+        catch (Exception)
+        {
+            errorMessage = "Registreren is mislukt. Is de API bereikbaar?";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

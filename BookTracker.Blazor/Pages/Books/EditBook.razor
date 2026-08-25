@@ -1,0 +1,156 @@
+@page "/books/{Id:int}/edit"
+@attribute [Authorize(Roles = "Administrator")]
+@using global::BookTracker.Blazor.Api
+@using global::BookTracker.Blazor.Models.Books
+@inject BookTrackerClient BookTrackerClient
+@inject NavigationManager NavigationManager
+
+<PageTitle>Boek bewerken</PageTitle>
+
+@if (loading)
+{
+    <p>Boek laden...</p>
+}
+else if (notFound)
+{
+    <p>Dit boek bestaat niet.</p>
+    <a href="/booktracker">Terug naar de boekenlijst</a>
+}
+else if (loadErrorMessage is not null)
+{
+    <p>@loadErrorMessage</p>
+}
+else
+{
+    <h1>Boek bewerken</h1>
+
+    <EditForm Model="model" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <label for="title">Titel</label>
+        <InputText id="title" @bind-Value="model.Title" />
+
+        <label for="author">Auteur</label>
+        <InputText id="author" @bind-Value="model.Author" />
+
+        <label for="year">Jaar</label>
+        <InputNumber id="year" @bind-Value="model.Year" />
+
+        <button type="submit" disabled="@isSubmitting">
+            @(isSubmitting ? "Bezig met opslaan..." : "Opslaan")
+        </button>
+    </EditForm>
+
+    @if (conflictMessage is not null)
+    {
+        <div>
+            <p>@conflictMessage</p>
+            <button type="button" class="reload-button" @onclick="ReloadLatestVersion">
+                Opnieuw laden
+            </button>
+        </div>
+    }
+    else if (submitErrorMessage is not null)
+    {
+        <p>@submitErrorMessage</p>
+    }
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private readonly UpdateBookRequest model = new();
+    private bool loading = true;
+    private bool notFound;
+    private string? loadErrorMessage;
+    private bool isSubmitting;
+    private string? submitErrorMessage;
+    private string? conflictMessage;
+    protected override async Task OnParametersSetAsync() => await LoadBook();
+
+    
+    private async Task LoadBook()
+    {
+        loading = true;
+        notFound = false;
+        loadErrorMessage = null;
+        conflictMessage = null;
+        submitErrorMessage = null;
+
+        try
+        {
+            BookDetailsResponse? book = await BookTrackerClient.GetBookDetails(Id);
+
+            if (book is null)
+            {
+                notFound = true;
+                return;
+            }
+
+            model.Title = book.Title;
+            model.Author = book.Author;
+            model.Year = book.Year;
+            model.Version = book.Version;
+        }
+        catch (Exception)
+        {
+            loadErrorMessage = "Boekdetails konden niet worden geladen. Is de API bereikbaar?";
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (isSubmitting) return;
+        isSubmitting = true;
+        submitErrorMessage = null;
+        conflictMessage = null;
+
+        try
+        {
+            UpdateBookResult result = await BookTrackerClient.UpdateBook(Id, model);
+
+            switch (result.Status)
+            {
+                case UpdateBookStatus.Updated:
+                    NavigationManager.NavigateTo($"/books/{Id}");
+                    break;
+
+                case UpdateBookStatus.Conflict:
+                    conflictMessage = result.ErrorMessage;
+                    break;
+
+                case UpdateBookStatus.ValidationFailed:
+                    submitErrorMessage = result.ErrorMessage;
+                    break;
+
+                case UpdateBookStatus.Unauthorized:
+                    submitErrorMessage = "Je bent niet meer ingelogd. Log opnieuw in.";
+                    break;
+
+                case UpdateBookStatus.Forbidden:
+                    submitErrorMessage = "Alleen administrators kunnen boeken bewerken.";
+                    break;
+
+                case UpdateBookStatus.NotFound:
+                    submitErrorMessage = "Dit boek bestaat niet meer.";
+                    break;
+            }
+        }
+        catch (Exception)
+        {
+            submitErrorMessage = "Het boek kon niet worden opgeslagen. Is de API bereikbaar?";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private async Task ReloadLatestVersion() => await LoadBook();
+
+}

@@ -25,6 +25,9 @@ else
     <p>Auteur: @book.Author</p>
     <p>Jaar: @book.Year</p>
     <a href="/booktracker">Terug naar de boeknlijst</a>
+    <AuthorizeView Roles="Administrator" Context="adminContext">
+        <a href="/books/@book.Id/edit">Bewerken</a>
+    </AuthorizeView>
 
 }
 

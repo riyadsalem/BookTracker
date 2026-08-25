@@ -41,6 +41,7 @@ public class BookDetailsTests : BunitContext
                 Version = Guid.NewGuid()
             }));
         });
+        AddAuthorization().SetAuthorized("Ada Reader");
 
         Render<BookDetails>(parameters => parameters.Add(component => component.Id, 1));
         Assert.Contains("/books/1", requestedUrl);
@@ -57,6 +58,8 @@ public class BookDetailsTests : BunitContext
             Year = 2024,
             Version = Guid.NewGuid()
         })));
+        AddAuthorization().SetAuthorized("Ada Reader");
+
 
         var cut = Render<BookDetails>(parameters => parameters.Add(component => component.Id, 2));
         Assert.Contains("Leven", cut.Markup);
@@ -67,6 +70,7 @@ public class BookDetailsTests : BunitContext
     public void Shows_NotFoundState_For404()
     {
         RegisterClient(_ => Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound)));
+        AddAuthorization().SetAuthorized("Ada Reader");
         var cut = Render<BookDetails>(parameters => parameters.Add(component => component.Id, 1));
         Assert.Contains("Dit boek bestaat niet.", cut.Markup);
     }
@@ -87,6 +91,7 @@ public class BookDetailsTests : BunitContext
                 Version = Guid.NewGuid()
             }));
         });
+        AddAuthorization().SetAuthorized("Ada Reader");
 
         var cut = Render<BookDetails>(parameters => parameters.Add(component => component.Id, 1));
         Assert.Contains("Leven", cut.Markup);

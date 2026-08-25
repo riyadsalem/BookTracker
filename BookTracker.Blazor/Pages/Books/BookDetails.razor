@@ -2,12 +2,19 @@
 @using global::BookTracker.Blazor.Api
 @using global::BookTracker.Blazor.Models.Books
 @inject BookTrackerClient BookTrackerClient
+@inject NavigationManager NavigationManager
+
 
 <PageTitle>Book Tracker</PageTitle>
 
 @if (loading)
 {
     <p>Boek laden...</p>
+}
+else if (deleteErrorMessage is not null)
+{
+    <p>@deleteErrorMessage</p>
+    <a href="/booktracker">Terug naar de boekenlijst</a>
 }
 else if (errorMessage is not null)
 {
@@ -17,18 +24,36 @@ else if (errorMessage is not null)
 else if (book is null)
 {
     <p>Dit boek bestaat niet.</p>
-    <a href="/booktracker">Terug naar de blekenlijst</a>
+    <a href="/booktracker">Terug naar de boekenlijst</a>
 }
 else
 {
     <h1>@book.Title</h1>
     <p>Auteur: @book.Author</p>
     <p>Jaar: @book.Year</p>
-    <a href="/booktracker">Terug naar de boeknlijst</a>
+    <a href="/booktracker">Terug naar de boekenlijst</a>
     <AuthorizeView Roles="Administrator" Context="adminContext">
         <a href="/books/@book.Id/edit">Bewerken</a>
-    </AuthorizeView>
 
+        @if (!confirmingDelete)
+        {
+            <button type="button" @onclick="() => confirmingDelete = true">
+                Verwijderen
+            </button>
+        }
+        else
+        {
+            <div>
+                <p>Weet je zeker dat je "@book.Title" wilt verwijderen?</p>
+                <button type="button" class="confirm-delete" disabled="@isDeleting" @onclick="ConfirmDelete">
+                    @(isDeleting ? "Bezig met verwijderen..." : "Ja, verwijderen")
+                </button>
+                <button type="button" disabled="@isDeleting" @onclick="() => confirmingDelete = false">
+                    Annuleren
+                </button>
+            </div>
+        }
+    </AuthorizeView>
 }
 
 @code {
@@ -36,6 +61,12 @@ else
     private BookDetailsResponse? book;
     private bool loading;
     private string? errorMessage;
+
+    // Delete
+    private bool confirmingDelete;
+    private bool isDeleting;
+    private string? deleteErrorMessage;
+
 
     protected override async Task OnParametersSetAsync()
     {
@@ -49,5 +80,46 @@ else
             errorMessage = "Boekdetails konden niet worden geladen. Is de API bereikbaar?";
         }
         finally { loading = false; }
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (isDeleting) return;
+        isDeleting = true;
+        deleteErrorMessage = null;
+
+        try
+        {
+            DeleteBookResult result = await BookTrackerClient.DeleteBook(Id);
+
+            switch (result.Status)
+            {
+                case DeleteBookStatus.Deleted:
+                    NavigationManager.NavigateTo("/booktracker");
+                    break;
+
+                case DeleteBookStatus.NotFound:
+                    book = null;
+                    deleteErrorMessage = "Dit boek bestaat niet meer. Het is mogelijk al verwijderd.";
+                    confirmingDelete = false;
+                    break;
+
+                case DeleteBookStatus.Unauthorized:
+                    deleteErrorMessage = "Je bent niet meer ingelogd. Log opnieuw in.";
+                    break;
+
+                case DeleteBookStatus.Forbidden:
+                    deleteErrorMessage = "Alleen administrators kunnen boeken verwijderen.";
+                    break;
+            }
+        }
+        catch (Exception)
+        {
+            deleteErrorMessage = "Het boek kon niet worden verwijderd. Is de API bereikbaar?";
+        }
+        finally
+        {
+            isDeleting = false;
+        }
     }
 }

@@ -106,6 +106,26 @@ public sealed class BookTrackerClient(HttpClient httpClient)
         response.EnsureSuccessStatusCode();
         throw new InvalidOperationException($"Unexpected status code {response.StatusCode} from PUT /books/{id}.");
     }
+    public async Task<DeleteBookResult> DeleteBook(int id)
+    {
+        var response = await httpClient.DeleteAsync($"/books/{id}");
+
+        if (response.StatusCode == HttpStatusCode.NoContent)
+            return new DeleteBookResult(DeleteBookStatus.Deleted);
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+            return new DeleteBookResult(DeleteBookStatus.Unauthorized);
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+            return new DeleteBookResult(DeleteBookStatus.Forbidden);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            return new DeleteBookResult(DeleteBookStatus.NotFound);
+
+        response.EnsureSuccessStatusCode();
+
+        throw new InvalidOperationException($"Unexpected status code {response.StatusCode} from DELETE /books/{id}.");
+    }
 
     private static async Task<string?> TryReadErrorMessage(HttpResponseMessage response)
     {

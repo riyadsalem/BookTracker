@@ -1,0 +1,78 @@
+@page "/members"
+@attribute [Authorize(Roles = "Administrator")]
+@using global::BookTracker.Blazor.Api
+@using global::BookTracker.Blazor.Models.Members
+@inject BookTrackerClient BookTrackerClient
+
+<PageTitle>Leden</PageTitle>
+
+<h1>Leden</h1>
+
+<input type="search" placeholder="Zoek op naam of e-mail" @bind="searchInput" @bind:event="oninput" />
+<button @onclick="Search">Zoeken</button>
+
+@if (loading)
+{
+    <p>Laden...</p>
+}
+else if (result is not null)
+{
+    @if (result.Items.Count == 0)
+    {
+        <p>Geen leden gevonden.</p>
+    }
+    else
+    {
+        <ul>
+            @foreach (var member in result.Items)
+            {
+                <li><a href="/members/@member.Id">@member.Name (@member.Email)</a></li>
+            }
+        </ul>
+
+        <p>Pagina @result.Page van @result.TotalPages</p>
+        <button @onclick="PreviousPage" disabled="@(result.Page <= 1)">Vorige</button>
+        <button @onclick="NextPage" disabled="@(result.Page >= result.TotalPages)">Volgende</button>
+    }
+}
+
+@code {
+    private GetMemberSummariesResponse? result;
+    private bool loading;
+    private string searchInput = string.Empty;
+    private string? activeSearch;
+    private int currentPage = 1;
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load()
+    {
+        loading = true;
+        result = await BookTrackerClient.GetMembers(activeSearch, currentPage, 10);
+        loading = false;
+    }
+
+    private async Task Search()
+    {
+        activeSearch = searchInput;
+        currentPage = 1;
+        await Load();
+    }
+
+    private async Task PreviousPage()
+    {
+        if (currentPage > 1)
+        {
+            currentPage--;
+            await Load();
+        }
+    }
+
+    private async Task NextPage()
+    {
+        if (result is not null && currentPage < result.TotalPages)
+        {
+            currentPage++;
+            await Load();
+        }
+    }
+}

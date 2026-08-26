@@ -1,0 +1,62 @@
+@page "/account"
+@attribute [Authorize]
+@using global::BookTracker.Blazor.Api
+@using global::BookTracker.Blazor.Auth
+@using global::BookTracker.Blazor.Models.Members
+@inject BookTrackerClient BookTrackerClient
+@inject BookTrackerAuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>Mijn account</PageTitle>
+
+@if (loading)
+{
+    <p>Laden...</p>
+}
+else if (member is not null)
+{
+    <h1>@member.Name</h1>
+    <p>@member.Email</p>
+    <p>Rol: @member.Role</p>
+
+    <a href="/account/edit">Account bewerken</a>
+
+    @if (!confirmingDelete)
+    {
+        <button @onclick="() => confirmingDelete = true">Account verwijderen</button>
+    }
+    else
+    {
+        <p>Weet je zeker dat je je account wilt verwijderen?</p>
+        <button disabled="@isDeleting" @onclick="ConfirmDelete">Ja, verwijderen</button>
+        <button disabled="@isDeleting" @onclick="() => confirmingDelete = false">Annuleren</button>
+    }
+}
+
+@code {
+    private CurrentMemberResponse? member;
+    private bool loading = true;
+    private bool confirmingDelete;
+    private bool isDeleting;
+
+    protected override async Task OnInitializedAsync()
+    {
+        member = await BookTrackerClient.GetCurrentMember();
+        loading = false;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (isDeleting || member is null) return;
+        isDeleting = true;
+
+        DeleteMemberResult result = await BookTrackerClient.DeleteMember(member.Id);
+
+        if (result.Status == DeleteMemberStatus.Deleted)
+        {
+            await AuthenticationStateProvider.SignOutAsync();
+            NavigationManager.NavigateTo("/booktracker");
+        }
+        isDeleting = false;
+    }
+}

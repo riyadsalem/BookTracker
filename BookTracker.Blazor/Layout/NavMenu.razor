@@ -39,6 +39,16 @@
                     </NavLink>
                 </div>
 
+                <div class="nav-item px-3">
+                    <NavLink href="account">Mijn account</NavLink>
+                </div>
+
+                <AuthorizeView Roles="Administrator" Context="membersContext">
+                    <div class="nav-item px-3">
+                        <NavLink href="members">Leden</NavLink>
+                    </div>
+                </AuthorizeView>
+
                 <AuthorizeView Roles="Administrator" Context="adminContext">
                     <div class="nav-item px-3">
                         <NavLink href="books/create">
@@ -53,11 +63,7 @@
 
 @code {
     private bool collapseNavMenu = true;
-
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    private void ToggleNavMenu() => collapseNavMenu = !collapseNavMenu;
 
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
 }

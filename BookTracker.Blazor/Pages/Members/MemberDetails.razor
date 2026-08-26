@@ -1,0 +1,81 @@
+@page "/members/{Id:int}"
+@attribute [Authorize(Roles = "Administrator")]
+@using global::BookTracker.Blazor.Api
+@using global::BookTracker.Blazor.Models.Members
+@inject BookTrackerClient BookTrackerClient
+@inject NavigationManager NavigationManager
+
+<PageTitle>Lid</PageTitle>
+
+@if (loading)
+{
+    <p>Laden...</p>
+}
+else if (deleteErrorMessage is not null)
+{
+    <p>@deleteErrorMessage</p>
+    <a href="/members">Terug naar de ledenlijst</a>
+}
+else if (member is null)
+{
+    <p>Dit lid bestaat niet.</p>
+    <a href="/members">Terug naar de ledenlijst</a>
+}
+else
+{
+    <h1>@member.Name</h1>
+    <p>@member.Email</p>
+    <a href="/members">Terug naar de ledenlijst</a>
+    <a href="/members/@member.Id/edit">Bewerken</a>
+
+    @if (!confirmingDelete)
+    {
+        <button @onclick="() => confirmingDelete = true">Verwijderen</button>
+    }
+    else
+    {
+        <p>Weet je zeker dat je "@member.Name" wilt verwijderen?</p>
+        <button class="confirm-delete" disabled="@isDeleting" @onclick="ConfirmDelete">Ja, verwijderen</button>
+        <button disabled="@isDeleting" @onclick="() => confirmingDelete = false">Annuleren</button>
+    }
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private MemberDetailsResponse? member;
+    private bool loading = true;
+    private bool confirmingDelete;
+    private bool isDeleting;
+    private string? deleteErrorMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+        member = await BookTrackerClient.GetMemberDetails(Id);
+        loading = false;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (isDeleting) return;
+        isDeleting = true;
+
+        DeleteMemberResult result = await BookTrackerClient.DeleteMember(Id);
+
+        if (result.Status == DeleteMemberStatus.Deleted)
+        {
+            NavigationManager.NavigateTo("/members");
+        }
+        else if (result.Status == DeleteMemberStatus.NotFound)
+        {
+            member = null;
+            deleteErrorMessage = "Dit lid bestaat niet meer. Het is mogelijk al verwijderd.";
+        }
+        else
+        {
+            deleteErrorMessage = "Verwijderen is mislukt.";
+        }
+
+        isDeleting = false;
+    }
+}

@@ -1,0 +1,83 @@
+@page "/account/edit"
+@attribute [Authorize]
+@using global::BookTracker.Blazor.Api
+@using global::BookTracker.Blazor.Models.Members
+@inject BookTrackerClient BookTrackerClient
+@inject NavigationManager NavigationManager
+
+<PageTitle>Account bewerken</PageTitle>
+
+@if (loading)
+{
+    <p>Laden...</p>
+}
+else
+{
+    <EditForm Model="model" OnValidSubmit="HandleSubmit">
+        <label for="name">Naam</label>
+        <InputText id="name" @bind-Value="model.Name" />
+
+        <label for="email">E-mail</label>
+        <InputText id="email" @bind-Value="model.Email" />
+
+        <button type="submit" disabled="@isSubmitting">Opslaan</button>
+    </EditForm>
+
+    @if (savedMessage is not null)
+    {
+        <p>@savedMessage</p>
+    }
+
+    @if (errorMessage is not null)
+    {
+        <p>@errorMessage</p>
+    }
+}
+
+@code {
+    private int? memberId;
+    private readonly UpdateMemberRequest model = new();
+    private bool loading = true;
+    private bool isSubmitting;
+    private string? savedMessage;
+    private string? errorMessage;
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentMemberResponse? current = await BookTrackerClient.GetCurrentMember();
+
+        if (current is not null)
+        {
+            memberId = current.Id;
+            model.Name = current.Name;
+            model.Email = current.Email;
+        }
+
+        loading = false;
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (isSubmitting || memberId is null) return;
+        isSubmitting = true;
+        errorMessage = null;
+        savedMessage = null;
+
+        UpdateMemberResult result = await BookTrackerClient.UpdateMember(memberId.Value, model);
+
+        switch (result.Status)
+        {
+            case UpdateMemberStatus.Updated:
+                savedMessage = "Je gegevens zijn bijgewerkt. Log opnieuw in om de wijziging overal te zien.";
+                break;
+            case UpdateMemberStatus.EmailConflict:
+            case UpdateMemberStatus.ValidationFailed:
+                errorMessage = result.ErrorMessage;
+                break;
+            case UpdateMemberStatus.Unauthorized:
+                errorMessage = "Je bent niet meer ingelogd. Log opnieuw in.";
+                break;
+        }
+
+        isSubmitting = false;
+    }
+}

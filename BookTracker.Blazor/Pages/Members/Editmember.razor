@@ -1,0 +1,84 @@
+@page "/members/{Id:int}/edit"
+@attribute [Authorize(Roles = "Administrator")]
+@using global::BookTracker.Blazor.Api
+@using global::BookTracker.Blazor.Models.Members
+@inject BookTrackerClient BookTrackerClient
+@inject NavigationManager NavigationManager
+
+<PageTitle>Lid bewerken</PageTitle>
+
+@if (loading)
+{
+    <p>Laden...</p>
+}
+else if (member is null)
+{
+    <p>Dit lid bestaat niet.</p>
+}
+else
+{
+    <EditForm Model="model" OnValidSubmit="HandleSubmit">
+        <label for="name">Naam</label>
+        <InputText id="name" @bind-Value="model.Name" />
+
+        <label for="email">E-mail</label>
+        <InputText id="email" @bind-Value="model.Email" />
+
+        <button type="submit" disabled="@isSubmitting">Opslaan</button>
+    </EditForm>
+
+    @if (errorMessage is not null)
+    {
+        <p>@errorMessage</p>
+    }
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private readonly UpdateMemberRequest model = new();
+    private MemberDetailsResponse? member;
+    private bool loading = true;
+    private bool isSubmitting;
+    private string? errorMessage;
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+        member = await BookTrackerClient.GetMemberDetails(Id);
+
+        if (member is not null)
+        {
+            model.Name = member.Name;
+            model.Email = member.Email;
+        }
+
+        loading = false;
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (isSubmitting) return;
+        isSubmitting = true;
+        errorMessage = null;
+
+        UpdateMemberResult result = await BookTrackerClient.UpdateMember(Id, model);
+
+        switch (result.Status)
+        {
+            case UpdateMemberStatus.Updated:
+                NavigationManager.NavigateTo($"/members/{Id}");
+                break;
+            case UpdateMemberStatus.EmailConflict:
+            case UpdateMemberStatus.ValidationFailed:
+                errorMessage = result.ErrorMessage;
+                break;
+            case UpdateMemberStatus.NotFound:
+                errorMessage = "Dit lid bestaat niet meer.";
+                break;
+            case UpdateMemberStatus.Forbidden:
+                errorMessage = "Alleen administrators kunnen andere leden bewerken.";
+                break;
+        }
+
+        isSubmitting = false;
+    }
+}

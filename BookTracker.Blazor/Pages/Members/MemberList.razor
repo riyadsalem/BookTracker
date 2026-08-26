@@ -15,6 +15,10 @@
 {
     <p>Laden...</p>
 }
+else if (errorMessage is not null)
+{
+    <p>@errorMessage</p>
+}
 else if (result is not null)
 {
     @if (result.Items.Count == 0)
@@ -39,16 +43,29 @@ else if (result is not null)
 @code {
     private GetMemberSummariesResponse? result;
     private bool loading;
+    private string? errorMessage;
     private string searchInput = string.Empty;
     private string? activeSearch;
     private int currentPage = 1;
     protected override async Task OnInitializedAsync() => await Load();
-
     private async Task Load()
     {
         loading = true;
-        result = await BookTrackerClient.GetMembers(activeSearch, currentPage, 10);
-        loading = false;
+        errorMessage = null;
+
+        try
+        {
+            result = await BookTrackerClient.GetMembers(activeSearch, currentPage, 10);
+        }
+        catch (Exception)
+        {
+            errorMessage = "Je hebt geen toegang tot deze pagina.";
+            result = null;
+        }
+        finally
+        {
+            loading = false;
+        }
     }
 
     private async Task Search()

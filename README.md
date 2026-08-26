@@ -1,8 +1,8 @@
 # 📚 Book Tracker
 
-A full-stack library management system — **.NET 8 API + React/TypeScript frontend** — built to demonstrate production-grade backend architecture, authentication/authorization design, and modern frontend patterns.
+A full-stack library management system — **.NET 8 API + React/TypeScript frontend, plus a Blazor WebAssembly frontend** — built to demonstrate production-grade backend architecture, authentication/authorization design, and modern frontend patterns.
 
-> Started as a simple CRUD API and evolved step by step into a fully authenticated, role-based application with JWT auth, optimistic concurrency, PostgreSQL, containerized deployment, and a React frontend — each capability added deliberately, with tests locking in the behavior.
+> Started as a simple CRUD API and evolved step by step into a fully authenticated, role-based application with JWT auth, optimistic concurrency, PostgreSQL, containerized deployment, and a React frontend — each capability added deliberately, with tests locking in the behavior. A second Blazor WebAssembly frontend was later built against the same API, to compare the two approaches.
 
 ## ✨ What this project demonstrates
 
@@ -18,6 +18,7 @@ A full-stack library management system — **.NET 8 API + React/TypeScript front
 | **Security-mindedness** | SQL `LIKE`/`ILIKE` wildcard injection prevented, NUL-byte edge cases rejected at the domain boundary, CORS locked to a known origin |
 | **Testing** | Unit tests for domain rules, a full integration test suite against a **real PostgreSQL container** (Testcontainers), split into a fast Docker-free suite and a slower infrastructure suite |
 | **Modern frontend** | React 19, TypeScript, React Router, TanStack Query — optimistic UI, cache invalidation, route guards |
+| **A second frontend, same API** | A Blazor WebAssembly app (`EditForm`, `AuthorizeView`, a custom `AuthenticationStateProvider`) consumes the exact same endpoints as the React app, with its own fast bUnit component-test suite |
 | **Containerized deployment** | Multi-stage Docker images for API, frontend (Nginx-served) and PostgreSQL, orchestrated with Docker Compose, health checks, and a persistent database volume |
 | **CI/CD** | GitHub Actions with separate fast-test and integration-test jobs running on every push |
 
@@ -41,9 +42,8 @@ Authorization rules live as plain, unit-testable domain functions — not `[Auth
 ## 🧰 Tech Stack
 
 **Backend:** .NET 8 · ASP.NET Core Minimal APIs · Entity Framework Core · PostgreSQL (Npgsql) · JWT Bearer Auth · xUnit · Testcontainers
-
 **Frontend:** React 19 · TypeScript · Vite · React Router · TanStack Query
-
+**Second frontend:** Blazor WebAssembly · EditForm / DataAnnotations · AuthorizeView · bUnit
 **Tooling:** GitHub Actions · EF Core Migrations · ESLint · Docker · Docker Compose · Nginx
 
 ## 🚀 Quick Start
@@ -58,11 +58,15 @@ dotnet run --project BookTracker.Api
 
 # Frontend (separate terminal)
 cd Frontend && npm install && npm run dev
+
+# Blazor frontend (separate terminal)
+dotnet run --project BookTracker.Blazor
 ```
 
 ```bash
 # Fast tests - no Docker required
 dotnet test BookTracker.Api.Tests/BookTracker.Api.Tests.csproj
+dotnet test BookTracker.Blazor.Tests/BookTracker.Blazor.Tests.csproj
 
 # Integration tests - spins up a temporary PostgreSQL container, Docker required
 dotnet test BookTracker.Api.IntegrationTests/BookTracker.Api.IntegrationTests.csproj

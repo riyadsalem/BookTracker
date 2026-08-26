@@ -3,11 +3,13 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using BookTracker.Blazor.Models.Auth;
 using BookTracker.Blazor.Models.Books;
+using BookTracker.Blazor.Models.Members;
 
 namespace BookTracker.Blazor.Api;
 
 public sealed class BookTrackerClient(HttpClient httpClient)
 {
+    // BOOKS .....
     public async Task<GetBookSummariesResponse> GetBooks(string? search, int page, int pageSize)
     {
         string url = $"/books?page={page}&pageSize={pageSize}";
@@ -142,6 +144,89 @@ public sealed class BookTrackerClient(HttpClient httpClient)
 
         response.EnsureSuccessStatusCode();
         return new RegisterResult(RegisterStatus.Registered);
+    }
+
+    // MEMBERS .........
+    public async Task<CurrentMemberResponse?> GetCurrentMember()
+    {
+        var response = await httpClient.GetAsync("/auth/me");
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized) return null;
+
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<CurrentMemberResponse>();
+    }
+
+    public async Task<GetMemberSummariesResponse> GetMembers(string? search, int page, int pageSize)
+    {
+        string url = $"/members?page={page}&pageSize={pageSize}";
+
+        if (!string.IsNullOrWhiteSpace(search)) url += $"&search={Uri.EscapeDataString(search)}";
+
+        return await httpClient.GetFromJsonAsync<GetMemberSummariesResponse>(url)
+            ?? throw new InvalidOperationException("Member list response was empty.");
+    }
+
+    public async Task<MemberDetailsResponse?> GetMemberDetails(int id)
+    {
+        var response = await httpClient.GetAsync($"/members/{id}");
+
+        if (response.StatusCode == HttpStatusCode.NotFound) return null;
+
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<MemberDetailsResponse>();
+    }
+
+    public async Task<UpdateMemberResult> UpdateMember(int id, UpdateMemberRequest request)
+    {
+        using var response = await httpClient.PutAsJsonAsync($"/members/{id}", request);
+
+        if (response.StatusCode == HttpStatusCode.NoContent)
+            return new UpdateMemberResult(UpdateMemberStatus.Updated);
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+            return new UpdateMemberResult(UpdateMemberStatus.Unauthorized);
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+            return new UpdateMemberResult(UpdateMemberStatus.Forbidden);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            return new UpdateMemberResult(UpdateMemberStatus.NotFound);
+
+        if (response.StatusCode == HttpStatusCode.Conflict)
+            return new UpdateMemberResult(UpdateMemberStatus.EmailConflict,
+        "Dit e-mailadres wordt al door een andere gebruiker gebruikt.");
+
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            string? message = await TryReadErrorMessage(response);
+            return new UpdateMemberResult(UpdateMemberStatus.ValidationFailed,
+                message ?? "De opgegeven gegevens zijn ongeldig.");
+        }
+
+        response.EnsureSuccessStatusCode();
+        throw new InvalidOperationException($"Unexpected status {response.StatusCode}.");
+
+    }
+
+    public async Task<DeleteMemberResult> DeleteMember(int id)
+    {
+        var response = await httpClient.DeleteAsync($"/members/{id}");
+
+        if (response.StatusCode == HttpStatusCode.NoContent)
+            return new DeleteMemberResult(DeleteMemberStatus.Deleted);
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+            return new DeleteMemberResult(DeleteMemberStatus.Unauthorized);
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+            return new DeleteMemberResult(DeleteMemberStatus.Forbidden);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            return new DeleteMemberResult(DeleteMemberStatus.NotFound);
+
+        response.EnsureSuccessStatusCode();
+        throw new InvalidOperationException($"Unexpected status {response.StatusCode}.");
     }
 
     private static async Task<string?> TryReadErrorMessage(HttpResponseMessage response)
